@@ -1,6 +1,139 @@
 {
-  "last_updated": "2026-08-02T18:18:20.373583+00:00",
-  "courses": [],
+  "last_updated": "2026-08-02T18:31:56.996002+00:00",
+  "courses": [
+    {
+      "id": "CVL2502",
+      "name": "Analysis of Determinate Structures",
+      "moodle": "new",
+      "color": "#3b82f6",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9901",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVL2001",
+      "name": "Climate Change & Adaptation",
+      "moodle": "new",
+      "color": "#10b981",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "MEP1000",
+      "name": "Introduction to Engineering Systems",
+      "moodle": "new",
+      "color": "#14b8a6",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=10374",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVP2702",
+      "name": "Fluid Mechanics & Hydraulics Lab",
+      "moodle": "new",
+      "color": "#ec4899",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9971",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVL2401",
+      "name": "Geological Engineering",
+      "moodle": "new",
+      "color": "#f59e0b",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9898",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVP2401",
+      "name": "Geological Engineering Lab",
+      "moodle": "new",
+      "color": "#f97316",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9967",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVL2702",
+      "name": "Hydraulics",
+      "moodle": "new",
+      "color": "#8b5cf6",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9903",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVP2502",
+      "name": "Solid Mechanics & Structural Lab",
+      "moodle": "new",
+      "color": "#06b6d4",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9969",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVL1301",
+      "name": "Surveying & Remote Sensing",
+      "moodle": "new",
+      "color": "#6366f1",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9896",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVL2601",
+      "name": "Traffic & Transportation Planning",
+      "moodle": "new",
+      "color": "#ef4444",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9902",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVP2601",
+      "name": "Traffic & Transport Planning Lab",
+      "moodle": "new",
+      "color": "#84cc16",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9970",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [],
+      "assignments": []
+    }
+  ],
   "lab_schedules": {
     "group1": [
       {
