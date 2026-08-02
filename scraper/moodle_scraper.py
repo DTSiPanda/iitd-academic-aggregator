@@ -11,7 +11,49 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from playwright.async_api import async_playwright, Page, BrowserContext
 from captcha_solver import solve_moodle_captcha
-from normalize import detect_course_code
+
+KNOWN_COURSES = {
+    "CVL1301": "Surveying & Remote Sensing",
+    "CVL2001": "Climate Change & Adaptation",
+    "CVL2401": "Geological Engineering",
+    "CVL2502": "Analysis of Determinate Structures",
+    "CVL2601": "Traffic & Transportation Planning",
+    "CVL2702": "Hydraulics",
+    "CVP2401": "Geological Engineering Lab",
+    "CVP2502": "Solid Mechanics & Structural Lab",
+    "CVP2601": "Traffic & Transport Planning Lab",
+    "CVP2702": "Fluid Mechanics & Hydraulics Lab",
+    "MEP1000": "Introduction to Engineering Systems",
+}
+
+COURSE_NAME_MAP = {
+    "ANALYSIS OF DETERMINATE STRUCTURES":               "CVL2502",
+    "CLIMATE CHANGE AND ADAPTATION":                    "CVL2001",
+    "ENGINEERING VISUALIZATION":                        "MEP1000",
+    "INTRODUCTION TO ENGINEERING SYSTEMS":              "MEP1000",
+    "FLUID MECHANICS AND HYDRAULICS LAB":               "CVP2702",
+    "GEOLOGICAL ENGINEERING LAB":                       "CVP2401",
+    "GEOLOGICAL ENGINEERING":                           "CVL2401",
+    "HYDRAULICS":                                       "CVL2702",
+    "SOLID MECHANICS AND STRUCTURAL ANALYSIS LABORATORY": "CVP2502",
+    "SOLID MECHANICS AND STRUCTURAL ANALYSIS":          "CVP2502",
+    "SURVEYING AND REMOTE SENSING":                     "CVL1301",
+    "TRAFFIC AND TRANSPORTATION PLANNING":              "CVL2601",
+    "TRAFFIC ENGINEERING AND TRANSPORTATION PLANNING LABORATORY": "CVP2601",
+    "TRAFFIC ENGINEERING AND TRANSPORTATION PLANNING":  "CVP2601",
+}
+
+def detect_course_code(name: str) -> str | None:
+    if not name:
+        return None
+    name_upper = name.upper().strip()
+    for code in KNOWN_COURSES:
+        if code in name_upper:
+            return code
+    for phrase, code in COURSE_NAME_MAP.items():
+        if phrase in name_upper:
+            return code
+    return None
 
 
 COURSE_CODES = [
