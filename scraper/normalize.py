@@ -180,6 +180,7 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
     """
     prev_data = load_previous_data(data_json_path)
     now = datetime.now(timezone.utc).isoformat()
+    lab_schedules, lecture_schedule, semester_timeline = load_lab_schedules()
 
     # Safety guard: If scrapers returned 0 courses (due to login failure or session expiry), keep previous course data!
     if not old_results and not new_results and prev_data and prev_data.get("courses"):
@@ -269,9 +270,6 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
             "new_items": resources_out,
             "assignments": assignments_out,
         })
-
-    # Load lab schedules, lecture schedule, and timeline from static file
-    lab_schedules, lecture_schedule, semester_timeline = load_lab_schedules()
 
     return {
         "last_updated": now,
