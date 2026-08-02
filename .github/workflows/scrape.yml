@@ -39,5 +39,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
+          mkdir -p public/files
           git add public/data.json public/files/
           git diff --quiet && git diff --staged --quiet || (git commit -m "auto: update moodle data & downloaded files [skip ci]" && git push)
