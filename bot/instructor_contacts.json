@@ -1,0 +1,50 @@
+{
+  "description": "Instructor and TA email contacts for IITD Civil Engg Sem 1 2026-27",
+  "last_updated": "2026-08-02",
+  "contacts": [
+    {
+      "courses": ["CVP2401"],
+      "name": "Deepanshu Shirole",
+      "role": "Instructor",
+      "email": "Deepanshu.shirole@civil.iitd.ac.in"
+    },
+    {
+      "courses": ["CVL2502"],
+      "name": "Sahil Bansal",
+      "role": "Instructor",
+      "email": "sahil@iitd.ac.in"
+    },
+    {
+      "courses": ["CVL2601", "CVP2601"],
+      "name": "Pramesh Kumar",
+      "role": "Instructor",
+      "email": "pkk@iitd.ac.in"
+    },
+    {
+      "courses": ["CVP2502"],
+      "name": "Allan Lambor Marbaniang",
+      "role": "Instructor",
+      "email": "allanm@iitd.ac.in"
+    },
+    {
+      "courses": ["CVP2702"],
+      "name": "Gaurav Verma",
+      "role": "TA",
+      "email": "cez238666@iitd.ac.in",
+      "note": "TA for CVP2702 (Fluid Mechanics & Hydraulics Lab). Main instructor: Deo Raj Kaushal"
+    },
+    {
+      "courses": ["MEP1000"],
+      "name": "MEP1000 Lab",
+      "role": "Lab Coordinator",
+      "email": "mep1000lab@iitd.ac.in"
+    }
+  ],
+  "pending": [
+    { "course": "CVL1301", "instructor": "Sri Harsha Kota",       "email": null },
+    { "course": "CVL2001", "instructor": "Gazala Habib",          "email": null },
+    { "course": "CVL2401", "instructor": "Bappaditya Manna",      "email": null },
+    { "course": "CVL2702", "instructor": "Saumava Dey",           "email": null },
+    { "course": "CVP2702", "instructor": "Deo Raj Kaushal",       "email": null }
+  ]
+}
