@@ -1,7 +1,7 @@
 'use client';
 
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
-import { getSemesterWeekInfo, isClassCancelled } from '@/lib/fetchData';
+import { getSemesterWeekInfo, isClassCancelled, formatDueDateWithDay } from '@/lib/fetchData';
 import { LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
 import ExamBanner from '@/components/ui/ExamBanner';
 

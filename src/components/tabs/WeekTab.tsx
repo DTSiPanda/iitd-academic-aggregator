@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
-import { isClassCancelled, getUrgencyLevel, formatTimeUntil, getCourseNotes } from '@/lib/fetchData';
+import { isClassCancelled, getUrgencyLevel, formatTimeUntil, getCourseNotes, formatDueDateWithDay } from '@/lib/fetchData';
 import { DAYS, LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
 import ExamBanner from '@/components/ui/ExamBanner';
 import NoteChip from '@/components/ui/NoteChip';
@@ -19,7 +19,7 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
     DAYS.includes(today) ? today : 'Monday'
   );
 
-  const myLabs = LAB_SLOTS_BY_GROUP[labGroup];
+  const myLabs = LAB_SLOTS_BY_GROUP[labGroup] || [];
 
   function getSlotsForDay(day: string): (Slot & { cancelled: boolean })[] {
     const lectures = LECTURE_SLOTS
@@ -42,7 +42,13 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
     ),
     ...overrides.deadline_overrides
       .filter(d => d.due_date <= weekEnd)
-      .map(d => ({ title: d.item, due_date: d.due_date, course: d.course, url: '#', source: 'bot' as const })),
+      .map(d => {
+        let resolvedDate = d.due_date;
+        if (d.scope === 'groupwise' && d.group_deadlines && d.group_deadlines[labGroup]) {
+          resolvedDate = d.group_deadlines[labGroup];
+        }
+        return { title: d.item, due_date: resolvedDate, course: d.course, url: '#', source: 'bot' as const };
+      }),
   ].sort((a, b) => (a.due_date || '').localeCompare(b.due_date || ''));
 
   const nextExam = overrides.exams
@@ -215,7 +221,7 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
                   fontSize: 11, fontWeight: 800, color: URGENCY_COLORS[urgency],
                   background: URGENCY_COLORS[urgency] + '15', padding: '4px 8px', borderRadius: 6, flexShrink: 0
                 }}>
-                  {formatTimeUntil(d.due_date)}
+                  {formatDueDateWithDay(d.due_date)} ({formatTimeUntil(d.due_date)})
                 </span>
               </a>
             );

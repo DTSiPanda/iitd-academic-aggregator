@@ -169,9 +169,21 @@ export function formatTimeUntil(isoString: string | null): string {
   const hours = Math.floor(mins / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) return `in ${days}d ${hours % 24}h`;
-  if (hours > 0) return `in ${hours}h ${mins % 60}m`;
-  return `in ${mins}m`;
+  if (days > 0) return `${days}d left`;
+  if (hours > 0) return `${hours}h left`;
+  return `${mins}m left`;
+}
+
+export function formatDueDateWithDay(isoString: string | null): string {
+  if (!isoString) return 'No due date';
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return isoString;
+  
+  const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+  const monthDay = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  
+  return `${dayName}, ${monthDay} • ${timeStr}`;
 }
 
 export function formatSyncAge(lastUpdatedISO: string): { text: string; status: 'fresh' | 'stale' | 'old' } {
