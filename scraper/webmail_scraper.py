@@ -92,7 +92,7 @@ def fetch_recent_instructor_emails():
                 is_match = (
                     any(inst in from_lower for inst in instructor_emails if inst) or
                     any(kw in subject.lower() for kw in ["cvl", "cvp", "mep1000"])
-                ) and "sahil@iitd.ac.in" not in from_lower
+                )
                 
                 if is_match:
                     # Extract plain text body

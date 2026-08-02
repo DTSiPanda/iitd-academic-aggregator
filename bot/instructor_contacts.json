@@ -9,6 +9,12 @@
       "email": "Deepanshu.shirole@civil.iitd.ac.in"
     },
     {
+      "courses": ["CVL2502"],
+      "name": "Sahil Bansal",
+      "role": "Instructor",
+      "email": "sahil@iitd.ac.in"
+    },
+    {
       "courses": ["CVL2601", "CVP2601"],
       "name": "Pramesh Kumar",
       "role": "Instructor",
