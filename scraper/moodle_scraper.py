@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from playwright.async_api import async_playwright, Page, BrowserContext
 from captcha_solver import solve_moodle_captcha
+from normalize import detect_course_code
 
 
 COURSE_CODES = [
