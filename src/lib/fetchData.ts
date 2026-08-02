@@ -18,9 +18,15 @@ export async function fetchData(): Promise<AggregatorData> {
 
 export async function fetchOverrides(): Promise<Overrides> {
   try {
-    const res = await fetch('/overrides.json', { cache: 'no-store' });
-    if (!res.ok) return EMPTY_OVERRIDES;
-    return res.json();
+    // 1. Try local / public overrides with cache busting
+    const res = await fetch(`/overrides.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) return await res.json();
+
+    // 2. Fallback to GitHub Raw Content (always fresh from Bot commits)
+    const rawRes = await fetch(`https://raw.githubusercontent.com/DTSiPanda/iitd-academic-aggregator/main/public/overrides.json?t=${Date.now()}`);
+    if (rawRes.ok) return await rawRes.json();
+
+    return EMPTY_OVERRIDES;
   } catch {
     return EMPTY_OVERRIDES;
   }
