@@ -141,12 +141,18 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
         {todayDeadlines.length > 0 && (
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#dc2626', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Today</div>
-            {todayDeadlines.map((d, i) => (
-              <div key={i} style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: '#991b1b' }}>{d.title} ({d.course})</span>
-                <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444' }}>{formatTimeUntil(d.due_date)}</span>
-              </div>
-            ))}
+            {todayDeadlines.map((d, i) => {
+              const color = COURSE_COLORS[d.course] || '#ef4444';
+              return (
+                <div key={i} style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 900, padding: '2px 6px', borderRadius: 4, background: color, color: '#fff' }}>{d.course}</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: '#991b1b' }}>{d.title}</span>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444' }}>{formatTimeUntil(d.due_date)}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -194,12 +200,18 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
         {tomorrowDeadlines.length > 0 && (
           <div style={{ marginTop: 10 }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Tomorrow</div>
-            {tomorrowDeadlines.map((d, i) => (
-              <div key={i} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#92400e' }}>{d.title} ({d.course})</span>
-                <span style={{ fontSize: 11, fontWeight: 900, color: '#f59e0b' }}>{formatTimeUntil(d.due_date)}</span>
-              </div>
-            ))}
+            {tomorrowDeadlines.map((d, i) => {
+              const color = COURSE_COLORS[d.course] || '#f59e0b';
+              return (
+                <div key={i} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: 900, padding: '2px 6px', borderRadius: 4, background: color, color: '#fff' }}>{d.course}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#92400e' }}>{d.title}</span>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: '#f59e0b' }}>{formatTimeUntil(d.due_date)}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

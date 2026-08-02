@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExamEntry } from '@/types/schema';
+import { COURSE_COLORS } from '@/lib/scheduleData';
 
 interface Props {
   exams: ExamEntry[];
@@ -27,10 +28,25 @@ export default function ExamBanner({ exams }: Props) {
           <div style={{ fontSize: 10, fontWeight: 800, color: '#92400e', textTransform: 'uppercase', letterSpacing: 1 }}>
             📝 NEXT EXAM MILESTONE
           </div>
-          <div style={{ fontSize: 17, fontWeight: 900, color: '#78350f', marginTop: 2 }}>
-            {primary.name}
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#78350f', marginTop: 2, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>{primary.name}</span>
+            {primary.courses && primary.courses.length > 0 && (
+              <div style={{ display: 'flex', gap: 4 }}>
+                {primary.courses.map(code => {
+                  const color = COURSE_COLORS[code] || '#d97706';
+                  return (
+                    <span key={code} style={{
+                      fontSize: 11, fontWeight: 900, padding: '2px 8px', borderRadius: 6,
+                      background: color, color: '#fff', textTransform: 'uppercase'
+                    }}>
+                      {code}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 12, color: '#92400e', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: '#92400e', marginTop: 4 }}>
             📅 {primary.start_date} {primary.start_date !== primary.end_date ? `→ ${primary.end_date}` : ''}
             {primary.note && <span> • {primary.note}</span>}
           </div>
@@ -51,10 +67,19 @@ export default function ExamBanner({ exams }: Props) {
             const d = Math.ceil((new Date(e.start_date).getTime() - new Date().getTime()) / 86400000);
             return (
               <div key={idx} style={{
-                background: '#ffffff99', padding: '4px 10px', borderRadius: 8,
-                fontSize: 11, color: '#78350f', fontWeight: 700, flex: '0 0 auto'
+                background: '#ffffff99', padding: '6px 10px', borderRadius: 8,
+                fontSize: 11, color: '#78350f', fontWeight: 700, flex: '0 0 auto',
+                display: 'flex', alignItems: 'center', gap: 6
               }}>
-                {e.name}: <strong>In {d}d</strong> ({e.start_date})
+                <span>{e.name}: <strong>In {d}d</strong> ({e.start_date})</span>
+                {e.courses && e.courses.map(code => (
+                  <span key={code} style={{
+                    fontSize: 9, fontWeight: 900, padding: '1px 5px', borderRadius: 4,
+                    background: COURSE_COLORS[code] || '#78350f', color: '#fff'
+                  }}>
+                    {code}
+                  </span>
+                ))}
               </div>
             );
           })}
