@@ -27,8 +27,11 @@ jobs:
       - name: Run Moodle Scraper
         env:
           MOODLE_SESSION: ${{ secrets.MOODLE_SESSION }}
-          MOODLENEW_SESSION: ${{ secrets.MOODLE_SESSION }}
-          MOODLENEW_SESSION_VAL: ${{ secrets.MOODLENEW_SESSION }}
+          MOODLENEW_SESSION: ${{ secrets.MOODLENEW_SESSION }}
+          KERBEROS_ID: ${{ secrets.KERBEROS_ID }}
+          KERBEROS_PASS: ${{ secrets.KERBEROS_PASS }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python scraper/scrape.py
 
