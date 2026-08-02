@@ -181,9 +181,13 @@ class MoodleScraper:
                         continue
 
                     full_url = href if href.startswith("http") else self.base_url + href
+                    
+                    # Download file using Playwright's authenticated request session
+                    local_file_url = await self._download_resource_file(page, result["course_id"], title, full_url)
+
                     result["resources"].append({
                         "title": title,
-                        "url": full_url,
+                        "url": local_file_url,
                         "type": "file",
                         "uploaded_at": None,  # will attempt to fill below
                     })
@@ -275,6 +279,49 @@ class MoodleScraper:
         except Exception:
             pass
         return None
+
+    async def _download_resource_file(self, page: Page, course_code: str, title: str, res_url: str) -> str:
+        """Download resource file from Moodle using Playwright's authenticated request context."""
+        try:
+            safe_title = re.sub(r'[^a-zA-Z0-9_\-]', '_', title).strip('_')
+            if not safe_title:
+                safe_title = "resource"
+
+            save_dir = os.path.join(os.path.dirname(__file__), "..", "public", "files", course_code)
+            os.makedirs(save_dir, exist_ok=True)
+
+            # Check if file already exists
+            for ext in [".pdf", ".pptx", ".docx", ".doc", ".zip", ".png", ".jpg"]:
+                existing_path = os.path.join(save_dir, f"{safe_title}{ext}")
+                if os.path.exists(existing_path):
+                    return f"/files/{course_code}/{safe_title}{ext}"
+
+            print(f"  [{self.label}] 📥 Downloading file: {title}...")
+            response = await page.request.get(res_url)
+            if response.status == 200:
+                content_type = response.headers.get("content-type", "").lower()
+                ext = ".pdf"
+                if "presentation" in content_type or "powerpoint" in content_type:
+                    ext = ".pptx"
+                elif "word" in content_type or "document" in content_type:
+                    ext = ".docx"
+                elif "png" in content_type:
+                    ext = ".png"
+                elif "jpeg" in content_type or "jpg" in content_type:
+                    ext = ".jpg"
+                elif "zip" in content_type:
+                    ext = ".zip"
+
+                file_path = os.path.join(save_dir, f"{safe_title}{ext}")
+                with open(file_path, "wb") as f:
+                    f.write(await response.body())
+
+                rel_url = f"/files/{course_code}/{safe_title}{ext}"
+                print(f"  [{self.label}] ✅ Saved local file -> {rel_url}")
+                return rel_url
+        except Exception as e:
+            print(f"  [{self.label}] ⚠️ Download skipped for '{title}': {e}")
+        return res_url
 
     async def scrape_all(self) -> list[dict]:
         """Main entry point — returns scraped course data from this Moodle."""
