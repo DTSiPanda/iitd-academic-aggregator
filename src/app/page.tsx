@@ -6,6 +6,7 @@ import { fetchData, fetchOverrides } from '@/lib/fetchData';
 import dynamic from 'next/dynamic';
 import GroupSelectorModal from '@/components/GroupSelectorModal';
 import GlobalSearch from '@/components/GlobalSearch';
+import SemesterTimelineHeader from '@/components/SemesterTimelineHeader';
 
 const TodayTab    = dynamic(() => import('@/components/tabs/TodayTab'));
 const WeekTab     = dynamic(() => import('@/components/tabs/WeekTab'));
@@ -127,6 +128,9 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {/* ── Top Milestone & Exam Countdown Bar ── */}
+      <SemesterTimelineHeader timeline={data.semester_timeline} />
 
       {/* ── Sticky Navy Navigation Bar ── */}
       <nav className="nav-bar" style={{ position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
