@@ -181,6 +181,12 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
     prev_data = load_previous_data(data_json_path)
     now = datetime.now(timezone.utc).isoformat()
 
+    # Safety guard: If scrapers returned 0 courses (due to login failure or session expiry), keep previous course data!
+    if not old_results and not new_results and prev_data and prev_data.get("courses"):
+        print("  [⚠️ WARNING] Scrapers returned 0 results (login/session issue). Preserving existing courses in data.json!")
+        prev_data["last_updated"] = now
+        return prev_data
+
     # Group all scraped courses by detected course code
     by_code: dict[str, list] = {}
     for entry in (old_results + new_results):
