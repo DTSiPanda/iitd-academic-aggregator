@@ -68,6 +68,11 @@ def _push_to_supabase(data: dict):
             "data": data,
             "updated_at": datetime.now().isoformat()
         }).execute()
+        sp.table("overrides").upsert({
+            "id": "current_overrides",
+            "data": data,
+            "updated_at": datetime.now().isoformat()
+        }).execute()
         print("[bot] Successfully synced overrides -> Supabase DB!")
     except Exception as e:
         print(f"[bot] Supabase sync warning: {e}")
