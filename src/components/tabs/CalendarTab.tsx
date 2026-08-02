@@ -19,13 +19,11 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState<Date | null>(today);
 
-  const weekInfo = getSemesterWeekInfo(
-    data.semester_timeline?.start_date || '2026-07-23',
-    data.semester_timeline?.total_weeks || 17
-  );
-
-  // Official IITD Sem 1 2026-27 academic calendar (from semester_timetable.pdf)
-  const milestones = data.semester_timeline?.milestones || [
+  // OFFICIAL IITD Sem 1 2026-27 academic calendar (locked — from semester_timetable.pdf)
+  // Do NOT use data.semester_timeline here — scraper values may be inaccurate
+  const SEMESTER_START = '2026-07-23';
+  const SEMESTER_TOTAL_WEEKS = 17;
+  const OFFICIAL_MILESTONES = [
     { name: 'Classes Begin', date: '2026-07-23', type: 'info' },
     { name: 'Last Date to Drop Course', date: '2026-08-07', type: 'info' },
     { name: 'Mid-Semester Exams (Minor)', date: '2026-09-12', type: 'exam' },
@@ -36,6 +34,9 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
     { name: 'End-Semester Exams (Major)', date: '2026-11-19', type: 'exam' },
     { name: 'End-Sem Exams End', date: '2026-11-25', type: 'exam' },
   ];
+
+  const weekInfo = getSemesterWeekInfo(SEMESTER_START, SEMESTER_TOTAL_WEEKS);
+  const milestones = OFFICIAL_MILESTONES;
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();

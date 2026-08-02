@@ -778,28 +778,53 @@
     ]
   },
   "semester_timeline": {
-    "start_date": "2026-07-27",
+    "start_date": "2026-07-23",
     "end_date": "2026-11-25",
-    "total_weeks": 14,
+    "total_weeks": 17,
     "milestones": [
       {
-        "name": "Semester Begins",
-        "date": "2026-07-27",
+        "name": "Classes Begin",
+        "date": "2026-07-23",
         "type": "info"
       },
       {
-        "name": "Mid-Sem / Minor Exams",
-        "date": "2026-09-14",
+        "name": "Last Date to Drop Course",
+        "date": "2026-08-07",
+        "type": "info"
+      },
+      {
+        "name": "Mid-Semester Exams (Minor)",
+        "date": "2026-09-12",
         "type": "exam"
       },
       {
-        "name": "Mid-Semester Break",
-        "date": "2026-09-21",
+        "name": "Mid-Sem Exams End",
+        "date": "2026-09-18",
+        "type": "exam"
+      },
+      {
+        "name": "Semester Break",
+        "date": "2026-09-28",
         "type": "break"
       },
       {
-        "name": "Major / Endsem Exams",
-        "date": "2026-11-16",
+        "name": "Break Ends / Classes Resume",
+        "date": "2026-10-05",
+        "type": "info"
+      },
+      {
+        "name": "Last Teaching Day",
+        "date": "2026-11-17",
+        "type": "info"
+      },
+      {
+        "name": "End-Semester Exams (Major)",
+        "date": "2026-11-19",
+        "type": "exam"
+      },
+      {
+        "name": "End-Sem Exams End",
+        "date": "2026-11-25",
         "type": "exam"
       }
     ]
