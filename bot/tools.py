@@ -99,23 +99,8 @@ def _next_weekday_date(day_name: str, from_date: datetime = None) -> datetime:
     return base + timedelta(days=days_ahead)
 
 
-def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
-    """Execute a tool call and write result to overrides.json. Returns human-readable confirmation."""
-    data = _load()
-
-    if tool_name == "cancel_class":
-        entry = {
-            "course": args["course"],
-            "day": args["day"],
-            "date": args.get("date"),
-            "note": args.get("note", ""),
-            "added_at": datetime.now().isoformat()
-        }
-        data["cancellations"].append(entry)
-        _save(data)
-        return f"❌ Noted — {args['course']} on {args['day']} marked as cancelled."
-
 def _fix_year(date_str: str) -> str:
+    """Ensure dates are always in the current academic year (2026) not past years."""
     if not date_str:
         return date_str
     for past in ["2025-", "2024-", "2023-"]:
@@ -125,6 +110,7 @@ def _fix_year(date_str: str) -> str:
 
 
 def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
+    """Execute a tool call and write result to overrides.json. Returns human-readable confirmation."""
     data = _load()
 
     if tool_name == "cancel_class":
