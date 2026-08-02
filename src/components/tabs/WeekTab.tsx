@@ -3,80 +3,15 @@
 import { useState } from 'react';
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
 import { isClassCancelled, getUrgencyLevel, formatTimeUntil, getCourseNotes } from '@/lib/fetchData';
+import { DAYS, LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
+import ExamBanner from '@/components/ui/ExamBanner';
+import NoteChip from '@/components/ui/NoteChip';
 
 interface Props {
   data: AggregatorData;
   labGroup: LabGroup;
   overrides: Overrides;
 }
-
-// ── Static schedule data ──────────────────────────────────────────────────────
-
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-
-interface Slot {
-  course: string;
-  code: string;
-  time: string;
-  venue: string;
-  type: 'lecture' | 'lab';
-  days?: string[]; // for lecture slots spanning multiple days
-}
-
-const LECTURE_SLOTS: Slot[] = [
-  { course: 'Surveying & RS',          code: 'CVL1301', time: '8:00 AM',  venue: 'WS 101 (SeNSE)', type: 'lecture', days: ['Monday', 'Thursday'] },
-  { course: 'Climate Change',          code: 'CVL2001', time: '12:00 PM', venue: 'LH 108',          type: 'lecture', days: ['Monday', 'Tuesday', 'Friday'] },
-  { course: 'Geological Engg',         code: 'CVL2401', time: '11:00 AM', venue: 'Block VI LT 2',   type: 'lecture', days: ['Tuesday', 'Friday'] },
-  { course: 'Structures',              code: 'CVL2502', time: '10:00 AM', venue: 'WS 101 (SeNSE)',  type: 'lecture', days: ['Tuesday', 'Wednesday', 'Friday'] },
-  { course: 'Traffic & Transport',     code: 'CVL2601', time: '9:00 AM',  venue: 'LH 416',          type: 'lecture', days: ['Tuesday', 'Wednesday', 'Friday'] },
-  { course: 'Hydraulics',              code: 'CVL2702', time: '8:00 AM',  venue: 'LH 416',          type: 'lecture', days: ['Tuesday', 'Wednesday', 'Friday'] },
-  { course: 'Eng Systems (Lec)',       code: 'MEP1000', time: '5:00 PM',  venue: 'Dogra Hall',      type: 'lecture', days: ['Tuesday'] },
-];
-
-const LAB_SLOTS_BY_GROUP: Record<LabGroup, Slot[]> = {
-  group1: [
-    { course: 'Solid Mechanics Lab',   code: 'CVP2502', time: '3:00 PM', venue: 'Block V, Rm 216',   type: 'lab', days: ['Monday'] },
-    { course: 'Traffic Lab',           code: 'CVP2601', time: '3:00 PM', venue: 'Comp Lab 4-A-8',     type: 'lab', days: ['Tuesday'] },
-    { course: 'Geology Lab',           code: 'CVP2401', time: '1:00 PM', venue: 'Block IV, Rm 331',  type: 'lab', days: ['Thursday'] },
-    { course: 'Hydraulics Lab',        code: 'CVP2702', time: '3:00 PM', venue: 'Block V, V312',      type: 'lab', days: ['Thursday'] },
-    { course: 'Eng Systems Lab',       code: 'MEP1000', time: '9:00 AM', venue: 'CSC',                type: 'lab', days: ['Monday'] },
-  ],
-  group2: [
-    { course: 'Solid Mechanics Lab',   code: 'CVP2502', time: '3:00 PM', venue: 'Block V, Rm 216',   type: 'lab', days: ['Tuesday'] },
-    { course: 'Traffic Lab',           code: 'CVP2601', time: '3:00 PM', venue: 'Comp Lab 4-A-8',     type: 'lab', days: ['Thursday'] },
-    { course: 'Geology Lab',           code: 'CVP2401', time: '1:00 PM', venue: 'Block IV, Rm 331',  type: 'lab', days: ['Friday'] },
-    { course: 'Hydraulics Lab',        code: 'CVP2702', time: '3:00 PM', venue: 'Block V, V312',      type: 'lab', days: ['Friday'] },
-    { course: 'Eng Systems Lab',       code: 'MEP1000', time: '9:00 AM', venue: 'CSC',                type: 'lab', days: ['Monday'] },
-  ],
-  group3: [
-    { course: 'Geology Lab',           code: 'CVP2401', time: '1:00 PM', venue: 'Block IV, Rm 331',  type: 'lab', days: ['Monday'] },
-    { course: 'Hydraulics Lab',        code: 'CVP2702', time: '3:00 PM', venue: 'Block V, V312',      type: 'lab', days: ['Monday'] },
-    { course: 'Solid Mechanics Lab',   code: 'CVP2502', time: '3:00 PM', venue: 'Block V, Rm 216',   type: 'lab', days: ['Thursday'] },
-    { course: 'Traffic Lab',           code: 'CVP2601', time: '3:00 PM', venue: 'Comp Lab 4-A-8',     type: 'lab', days: ['Friday'] },
-    { course: 'Eng Systems Lab',       code: 'MEP1000', time: '9:00 AM', venue: 'CSC',                type: 'lab', days: ['Thursday'] },
-  ],
-  group4: [
-    { course: 'Traffic Lab',           code: 'CVP2601', time: '3:00 PM', venue: 'Comp Lab 4-A-8',     type: 'lab', days: ['Monday'] },
-    { course: 'Geology Lab',           code: 'CVP2401', time: '1:00 PM', venue: 'Block IV, Rm 331',  type: 'lab', days: ['Tuesday'] },
-    { course: 'Hydraulics Lab',        code: 'CVP2702', time: '3:00 PM', venue: 'Block V, V312',      type: 'lab', days: ['Tuesday'] },
-    { course: 'Solid Mechanics Lab',   code: 'CVP2502', time: '3:00 PM', venue: 'Block V, Rm 216',   type: 'lab', days: ['Friday'] },
-    { course: 'Eng Systems Lab',       code: 'MEP1000', time: '9:00 AM', venue: 'CSC',                type: 'lab', days: ['Thursday'] },
-  ],
-};
-
-const COURSE_COLORS: Record<string, string> = {
-  CVL1301: '#6366f1', CVL2001: '#10b981', CVL2401: '#f59e0b',
-  CVL2502: '#3b82f6', CVL2601: '#8b5cf6', CVL2702: '#0ea5e9',
-  MEP1000: '#64748b', CVP2401: '#d97706', CVP2502: '#2563eb',
-  CVP2601: '#7c3aed', CVP2702: '#0284c7',
-};
-
-const TIME_ORDER: Record<string, number> = {
-  '8:00 AM': 800, '9:00 AM': 900, '10:00 AM': 1000, '11:00 AM': 1100,
-  '12:00 PM': 1200, '1:00 PM': 1300, '3:00 PM': 1500, '5:00 PM': 1700,
-};
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function WeekTab({ data, labGroup, overrides }: Props) {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
@@ -86,7 +21,6 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
 
   const myLabs = LAB_SLOTS_BY_GROUP[labGroup];
 
-  // ── Build slot list for a day ──────────────────────────────────────────────
   function getSlotsForDay(day: string): (Slot & { cancelled: boolean })[] {
     const lectures = LECTURE_SLOTS
       .filter(s => s.days?.includes(day))
@@ -99,7 +33,6 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
     return [...lectures, ...labs].sort((a, b) => (TIME_ORDER[a.time] ?? 0) - (TIME_ORDER[b.time] ?? 0));
   }
 
-  // ── Upcoming deadlines merged ──────────────────────────────────────────────
   const weekEnd = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
   const allDeadlines = [
     ...data.courses.flatMap(c =>
@@ -122,30 +55,7 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
 
       {/* ── Exam Banner ── */}
-      {nextExam && (() => {
-        const days = Math.ceil((new Date(nextExam.start_date).getTime() - new Date().getTime()) / 86400000);
-        return (
-          <div style={{
-            background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-            border: '2px solid #f59e0b',
-            borderRadius: 12, padding: '12px 16px', marginBottom: 16,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-          }}>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 800, color: '#92400e', textTransform: 'uppercase', letterSpacing: 1 }}>📝 Upcoming Exam</div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: '#78350f', marginTop: 2 }}>{nextExam.name}</div>
-              <div style={{ fontSize: 11, color: '#92400e' }}>{nextExam.start_date} → {nextExam.end_date}</div>
-            </div>
-            <div style={{
-              background: days <= 7 ? '#ef4444' : days <= 14 ? '#f59e0b' : '#10b981',
-              color: '#fff', borderRadius: 20, padding: '6px 12px',
-              fontSize: 13, fontWeight: 900
-            }}>
-              {days > 0 ? `${days}d` : 'TODAY'}
-            </div>
-          </div>
-        );
-      })()}
+      {nextExam && <ExamBanner exam={nextExam} />}
 
       {/* ── Day Selector ── */}
       <div style={{
@@ -222,7 +132,6 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ flex: 1 }}>
-                    {/* Course code + type badge */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <span style={{
                         fontSize: 12, fontWeight: 900, color,
@@ -243,7 +152,6 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
                       )}
                     </div>
 
-                    {/* Course name */}
                     <div style={{
                       fontSize: 14, fontWeight: 700, color: '#0f172a',
                       textDecoration: slot.cancelled ? 'line-through' : 'none'
@@ -251,25 +159,15 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
                       {slot.course}
                     </div>
 
-                    {/* Venue */}
                     <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
                       📍 {slot.venue}
                     </div>
 
-                    {/* Notes from bot */}
                     {notes.slice(0, 2).map((note, ni) => (
-                      <div key={ni} style={{
-                        fontSize: 11, fontWeight: 600, marginTop: 5,
-                        color: { high: '#dc2626', medium: '#d97706', low: '#3b82f6' }[note.priority],
-                        background: { high: '#fef2f2', medium: '#fffbeb', low: '#eff6ff' }[note.priority],
-                        padding: '3px 8px', borderRadius: 6, display: 'inline-block'
-                      }}>
-                        {note.priority === 'high' ? '🔴' : note.priority === 'medium' ? '🟡' : '🔵'} {note.text}
-                      </div>
+                      <NoteChip key={ni} note={note} />
                     ))}
                   </div>
 
-                  {/* Time */}
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{ fontSize: 15, fontWeight: 900, color: '#0f172a' }}>{slot.time}</div>
                   </div>

@@ -9,36 +9,9 @@ import os
 import json
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv
+from config import GEMINI_API_KEY, SCHEDULE_CONTEXT
 
-load_dotenv()
-
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-# ── Schedule context fed to Gemini as system prompt ──────────────────────────
-
-SCHEDULE_CONTEXT = """
-You are an academic assistant for an IIT Delhi Civil Engineering 2nd year student.
-
-COURSES:
-- CVL1301: Surveying & Remote Sensing | Mon 8AM, Thu 8AM | WS 101 (SeNSE) | Sri Harsha Kota
-- CVL2001: Climate Change & Adaptation | Mon 12PM, Tue 12PM, Fri 12PM | LH 108 | Gazala Habib
-- CVL2401: Geological Engineering | Tue 11AM, Fri 11AM | Block VI LT 2 | Bappaditya Manna
-- CVL2502: Analysis of Determinate Structures | Tue 10AM, Wed 10AM, Fri 10AM | WS 101 | Sahil Bansal
-- CVL2601: Traffic & Transportation Planning | Tue 9AM, Wed 9AM, Fri 9AM | LH 416 | Pramesh Kumar
-- CVL2702: Hydraulics | Tue 8AM, Wed 8AM, Fri 8AM | LH 416 | Saumava Dey
-- MEP1000: Intro to Engineering Systems | Tue 5PM | Dogra Hall (+ Lab Mon/Thu at CSC)
-
-LABS (per group — weekly rotation):
-- CVP2401 Geological Lab | Deepanshu Shirole | Block IV Rm 331
-- CVP2502 Solid Mechanics Lab | Allan Lambor Marbaniang | Block V Rm 216
-- CVP2601 Traffic Lab | Pramesh Kumar | Blk IV-3F 4-A-8
-- CVP2702 Hydraulics Lab | Deo Raj Kaushal | Blk V V312/V313
-
-LAB REPORT RULE: Report due at the NEXT scheduled lab session for that course (exactly 7 days after performing the experiment, same time slot).
-
-TUTORIAL SHEETS: No scheduled slot — just practice PDFs uploaded to Moodle. No deadline unless prof explicitly says so.
-"""
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # ── Tool definitions (function calling schema) ────────────────────────────────
 
