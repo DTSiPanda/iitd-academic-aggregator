@@ -87,9 +87,12 @@ def fetch_recent_instructor_emails():
                 subject = parse_header_str(msg.get("Subject"))
                 date_hdr = parse_header_str(msg.get("Date"))
 
-                # Check if sender matches any instructor
+                # Check if sender matches any registered instructor
                 from_lower = from_hdr.lower()
-                is_match = any(inst in from_lower for inst in instructor_emails) or any(kw in subject.lower() for kw in ["cvl", "cvp", "mep1000", "iitd"])
+                is_match = (
+                    any(inst in from_lower for inst in instructor_emails if inst) or
+                    any(kw in subject.lower() for kw in ["cvl", "cvp", "mep1000"])
+                ) and "sahil@iitd.ac.in" not in from_lower
                 
                 if is_match:
                     # Extract plain text body
