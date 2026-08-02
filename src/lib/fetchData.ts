@@ -110,13 +110,6 @@ export function getNextExam(exams: Overrides['exams']) {
 
 export function getResourceUrl(courseId: string, res: { title: string; url: string; type?: string }): string {
   if (!res.url) return '#';
-  if (res.url.startsWith('/files/')) return res.url;
-  
-  // If it's a Moodle file link, resolve to static downloaded PDF
-  if (res.url.includes('moodle.iitd.ac.in/mod/resource/')) {
-    const safeTitle = res.title.replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/^_|_$/g, '');
-    return `/files/${courseId}/${safeTitle}.pdf`;
-  }
   return res.url;
 }
 
