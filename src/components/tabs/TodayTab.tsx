@@ -22,7 +22,7 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
   const tomorrowName = DAYS[tomorrowIdx === 0 ? 6 : tomorrowIdx - 1] || 'Monday';
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const weekInfo = getSemesterWeekInfo(data.semester_timeline?.start_date || '2026-08-01', data.semester_timeline?.total_weeks || 16);
+  const weekInfo = getSemesterWeekInfo(data.semester_timeline?.start_date || '2026-07-23', data.semester_timeline?.total_weeks || 17);
 
   const myLabs = LAB_SLOTS_BY_GROUP[labGroup] || [];
 

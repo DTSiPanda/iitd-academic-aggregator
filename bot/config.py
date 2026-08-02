@@ -44,4 +44,15 @@ LABS:
 - CVP2702 Hydraulics Lab | Deo Raj Kaushal | Blk V V312/V313
 
 LAB REPORT RULE: Report due at the NEXT scheduled lab session for that course (exactly 7 days after performing the experiment).
+
+OFFICIAL ACADEMIC CALENDAR — Semester 1, 2026-27 (IITD):
+- Classes began: 23 July 2026 (Thursday)
+- Last date to drop course: 7 Aug 2026 (Friday)
+- Mid-Semester Exams (Minor): 12 Sep 2026 (Sat) → 18 Sep 2026 (Fri)
+- Semester Break: 28 Sep 2026 (Mon) → 4 Oct 2026 (Sun)
+- Classes resume: 5 Oct 2026 (Monday)
+- Last teaching day: 17 Nov 2026 (Tuesday)
+- End-Semester Exams (Major): 19 Nov 2026 (Thu) → 25 Nov 2026 (Wed)
+
+EXAM DATES RULE: When user says "minor" without specifying dates, use 12 Sep 2026 as start. When user says "major" or "endsem", use 19 Nov 2026 as start.
 """

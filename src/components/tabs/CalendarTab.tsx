@@ -20,16 +20,21 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
   const [selected, setSelected] = useState<Date | null>(today);
 
   const weekInfo = getSemesterWeekInfo(
-    data.semester_timeline?.start_date || '2026-08-01',
-    data.semester_timeline?.total_weeks || 16
+    data.semester_timeline?.start_date || '2026-07-23',
+    data.semester_timeline?.total_weeks || 17
   );
 
+  // Official IITD Sem 1 2026-27 academic calendar (from semester_timetable.pdf)
   const milestones = data.semester_timeline?.milestones || [
-    { name: 'Semester Begins', date: '2026-08-01', type: 'info' },
-    { name: 'Minor 1 Exams', date: '2026-09-18', type: 'exam' },
-    { name: 'Mid-Semester Break', date: '2026-10-12', type: 'break' },
-    { name: 'Minor 2 Exams', date: '2026-10-24', type: 'exam' },
-    { name: 'Major / Endsem Exams', date: '2026-11-20', type: 'exam' },
+    { name: 'Classes Begin', date: '2026-07-23', type: 'info' },
+    { name: 'Last Date to Drop Course', date: '2026-08-07', type: 'info' },
+    { name: 'Mid-Semester Exams (Minor)', date: '2026-09-12', type: 'exam' },
+    { name: 'Mid-Sem Exams End', date: '2026-09-18', type: 'exam' },
+    { name: 'Semester Break', date: '2026-09-28', type: 'break' },
+    { name: 'Break Ends / Classes Resume', date: '2026-10-05', type: 'info' },
+    { name: 'Last Teaching Day', date: '2026-11-17', type: 'info' },
+    { name: 'End-Semester Exams (Major)', date: '2026-11-19', type: 'exam' },
+    { name: 'End-Sem Exams End', date: '2026-11-25', type: 'exam' },
   ];
 
   const year = viewDate.getFullYear();
