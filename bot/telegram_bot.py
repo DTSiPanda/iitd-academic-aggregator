@@ -221,6 +221,45 @@ async def notes_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
+async def sync_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _is_owner(update):
+        return
+    await update.message.reply_text("⚡ Initiating full platform sync (Moodle + Webmail)...")
+    
+    # 1. Trigger GitHub Actions scraper workflow if GITHUB_TOKEN is available
+    token = os.getenv("GITHUB_TOKEN")
+    repo = os.getenv("GITHUB_REPO", "DTSiPanda/iitd-academic-aggregator")
+    gh_triggered = False
+    if token:
+        try:
+            url = f"https://api.github.com/repos/{repo}/actions/workflows/scrape.yml/dispatches"
+            headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github.v3+json"}
+            res = requests.post(url, headers=headers, json={"ref": "main"})
+            if res.status_code == 24:
+                gh_triggered = True
+        except Exception:
+            pass
+
+    # 2. Run Webmail scraper directly
+    try:
+        import sys
+        sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scraper"))
+        from webmail_scraper import fetch_recent_instructor_emails, process_emails_with_gemini
+        mails = fetch_recent_instructor_emails()
+        if mails:
+            process_emails_with_gemini(mails)
+    except Exception as e:
+        print(f"[bot] Sync webmail error: {e}")
+
+    msg = "✅ Webmail sync complete!"
+    if gh_triggered:
+        msg += "\n🚀 Triggered Moodle scraper on GitHub Actions!"
+    else:
+        msg += "\n💡 Tip: Add GITHUB_TOKEN to Render env to trigger remote Moodle scraper on demand."
+
+    await update.message.reply_text(msg)
+
+
 async def webmail_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _is_owner(update):
         return
@@ -298,6 +337,7 @@ def main():
     app.add_handler(CommandHandler("due", due_command))
     app.add_handler(CommandHandler("new", new_command))
     app.add_handler(CommandHandler("notes", notes_command))
+    app.add_handler(CommandHandler("sync", sync_command))
     app.add_handler(CommandHandler("webmail", webmail_command))
     app.add_handler(CommandHandler("mail", webmail_command))
     app.add_handler(CallbackQueryHandler(group_callback, pattern="^group_"))
