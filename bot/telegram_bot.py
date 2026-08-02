@@ -264,9 +264,33 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"IITD Academic Bot is active!")
+
+    def log_message(self, format, *args):
+        pass # suppress HTTP logs
+
+def start_health_server():
+    port = int(os.environ.get("PORT", 8080))
+    try:
+        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        server.serve_forever()
+    except Exception as e:
+        print(f"[BOT] Health server warning: {e}")
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
+    # Start HTTP server on PORT for Render Web Service (Free Tier)
+    threading.Thread(target=start_health_server, daemon=True).start()
+
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
