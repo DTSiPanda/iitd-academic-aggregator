@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { AggregatorData, LabGroup, LectureSlot, LabSlot, Resource, Overrides } from '@/types/schema';
-import { formatTimeUntil, getUrgencyLevel, formatRelativeTime } from '@/lib/fetchData';
+import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
+import {
+  formatTimeUntil, getUrgencyLevel, getResourceUrl,
+  getSemesterWeekInfo, isClassCancelled, getCourseNotes
+} from '@/lib/fetchData';
+import { DAYS, LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
+import ExamBanner from '@/components/ui/ExamBanner';
+import NoteChip from '@/components/ui/NoteChip';
 
 interface Props {
   data: AggregatorData;
@@ -10,268 +15,235 @@ interface Props {
   overrides: Overrides;
 }
 
-const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-function parseTimeToMinutes(timeStr: string): number {
-  const start = timeStr.split('-')[0].trim();
-  const isPM = timeStr.toUpperCase().includes('PM');
-  const [h, m] = start.replace(/[AP]M/i, '').trim().split(':').map(Number);
-  let hours = h;
-  if (isPM && h !== 12) hours += 12;
-  if (!isPM && h === 12) hours = 0;
-  return hours * 60 + (m || 0);
-}
-
 export default function TodayTab({ data, labGroup, overrides }: Props) {
-  const [showNotices, setShowNotices] = useState(false);
   const now = new Date();
-  const todayName = DAYS[now.getDay()];
+  const todayName = DAYS[now.getDay() - 1] || (now.getDay() === 0 ? 'Sunday' : 'Monday');
+  const tomorrowIdx = (now.getDay() % 7);
+  const tomorrowName = DAYS[tomorrowIdx === 0 ? 6 : tomorrowIdx - 1] || 'Monday';
+
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const weekInfo = getSemesterWeekInfo(data.semester_timeline?.start_date || '2026-08-01', data.semester_timeline?.total_weeks || 16);
 
-  // Classify all resources
-  const allResources = data.courses.flatMap(c =>
-    c.new_items.map(r => ({
-      ...r,
-      courseId: c.id,
-      courseName: c.name,
-      courseColor: c.color,
-      groupDeadline: r.group_deadlines ? r.group_deadlines[labGroup] : undefined,
-    }))
-  );
+  const myLabs = LAB_SLOTS_BY_GROUP[labGroup] || [];
 
-  const labResources      = allResources.filter(r => r.category === 'lab');
-  const tutorialResources = allResources.filter(r => r.category === 'tutorial');
-  const lectureResources  = allResources.filter(r => r.category === 'lecture');
-  const noticeResources   = allResources.filter(r => r.category === 'notice');
+  // Helper to fetch slots for a given day
+  function getDaySlots(day: string): (Slot & { cancelled: boolean })[] {
+    const lectures = LECTURE_SLOTS
+      .filter(s => s.days?.includes(day))
+      .map(s => ({ ...s, cancelled: isClassCancelled(overrides.cancellations, s.code, day) }));
 
-  // Build today's events: lectures + labs
-  const lectureSlots: (LectureSlot & { kind: 'lecture' })[] =
-    ((data.lecture_schedule && data.lecture_schedule[todayName]) || []).map(s => ({ ...s, kind: 'lecture' as const }));
+    const labs = myLabs
+      .filter(s => s.days?.includes(day))
+      .map(s => ({ ...s, cancelled: isClassCancelled(overrides.cancellations, s.code, day) }));
 
-  const labSlots: (LabSlot & { kind: 'lab' })[] =
-    ((data.lab_schedules && data.lab_schedules[labGroup]) || [])
-      .filter(s => s.day === todayName)
-      .map(s => ({ ...s, kind: 'lab' as const }));
+    return [...lectures, ...labs].sort((a, b) => (TIME_ORDER[a.time] ?? 0) - (TIME_ORDER[b.time] ?? 0));
+  }
 
-  type Event = { kind: 'lecture' | 'lab'; course: string; time: string; venue: string; note?: string; startMin: number };
-  const allEvents: Event[] = [
-    ...lectureSlots.map(s => ({ ...s, startMin: parseTimeToMinutes(s.time) })),
-    ...labSlots.map(s => ({ ...s, startMin: parseTimeToMinutes(s.time) })),
-  ].sort((a, b) => a.startMin - b.startMin);
+  const todaySlots = getDaySlots(todayName);
+  const tomorrowSlots = getDaySlots(tomorrowName);
 
-  const nextEvent = allEvents.find(e => e.startMin > currentMinutes);
-  const currentEvent = allEvents.find(e => {
-    const dur = e.kind === 'lab' ? 120 : 55;
-    return e.startMin <= currentMinutes && e.startMin + dur > currentMinutes;
-  });
-
-  // Upcoming deadlines (Moodle + bot overrides merged)
+  // Deadlines filtering
   const weekEnd = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
-  const moodleDeadlines = data.courses.flatMap(c =>
-    c.assignments
-      .filter(a => a.due_date && a.due_date <= weekEnd)
-      .map(a => ({ title: a.title, url: a.url, due_date: a.due_date, courseId: c.id, courseName: c.name, courseColor: c.color, source: 'moodle' as const, note: undefined as string | undefined }))
-  );
-  const botDeadlines = overrides.deadline_overrides
-    .filter(d => d.due_date <= weekEnd)
-    .map(d => ({ title: d.item, url: '#', due_date: d.due_date, courseId: d.course, courseName: d.course, courseColor: '#6366f1', source: 'bot' as const, note: d.note }));
-  const weekDeadlines = [...moodleDeadlines, ...botDeadlines]
-    .sort((a, b) => (a.due_date || '').localeCompare(b.due_date || ''));
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+  const tomorrowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59).toISOString();
+
+  const allDeadlines = [
+    ...data.courses.flatMap(c =>
+      c.assignments
+        .filter(a => a.due_date && a.due_date <= weekEnd)
+        .map(a => ({ title: a.title, due_date: a.due_date!, course: c.id, url: a.url, source: 'moodle' as const }))
+    ),
+    ...overrides.deadline_overrides
+      .filter(d => d.due_date <= weekEnd)
+      .map(d => ({ title: d.item, due_date: d.due_date, course: d.course, url: '#', source: 'bot' as const })),
+  ].sort((a, b) => a.due_date.localeCompare(b.due_date));
+
+  const todayDeadlines = allDeadlines.filter(d => d.due_date <= todayEnd);
+  const tomorrowDeadlines = allDeadlines.filter(d => d.due_date > todayEnd && d.due_date <= tomorrowEnd);
+  const thisWeekDeadlines = allDeadlines.filter(d => d.due_date > tomorrowEnd && d.due_date <= weekEnd);
 
   return (
-    <div className="today-tab">
-      {/* ── DO THIS NEXT: Action Priority Engine ── */}
-      <div style={{ background: '#ffffff', border: '2px solid #4f46e5', borderRadius: 16, padding: 20, boxShadow: '0 4px 14px rgba(79, 70, 229, 0.12)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>⚡</span>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-              DO THIS NEXT — Priority Action Queue
-            </h2>
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
+
+      {/* ── Semester Week Awareness Header ── */}
+      <div style={{
+        background: '#0f172a', color: '#fff', borderRadius: 14, padding: '16px', marginBottom: 16,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      }}>
+        <div>
+          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+            IIT DELHI • SEMESTER 1 (2026-27)
           </div>
-          <span className="legend-pill lecture" style={{ fontSize: 11 }}>
-            {labGroup.toUpperCase().replace('GROUP', 'GROUP ')} ACTIVE
+          <div style={{ fontSize: 20, fontWeight: 900, marginTop: 2 }}>
+            Week {weekInfo.currentWeek} <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>/ {weekInfo.totalWeeks}</span>
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#38bdf8' }}>{todayName}</div>
+          <div style={{ fontSize: 11, color: '#94a3b8' }}>Group {labGroup.replace('group', '')}</div>
+        </div>
+      </div>
+
+      {/* ── Exam Banner ── */}
+      <ExamBanner exams={overrides.exams} />
+
+      {/* ── 1. TODAY'S ACTION PLAN ── */}
+      <div style={{
+        background: '#fff', border: '2px solid #3b82f6', borderRadius: 16, padding: '16px', marginBottom: 20,
+        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.08)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 18 }}>📌</span>
+            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#1e3a8a', margin: 0 }}>TODAY'S ACTION PLAN</h2>
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 800, background: '#eff6ff', color: '#2563eb', padding: '3px 8px', borderRadius: 12 }}>
+            {todayName.toUpperCase()}
           </span>
         </div>
 
-        {/* Upcoming Exam Warning (from bot overrides) */}
-        {overrides.exams.filter(e => new Date(e.end_date) >= new Date()).slice(0, 1).map((exam, i) => {
-          const days = Math.ceil((new Date(exam.start_date).getTime() - new Date().getTime()) / 86400000);
-          return (
-            <div key={i} style={{ background: '#fff7ed', border: '2px solid #f59e0b', borderRadius: 10, padding: '10px 14px', marginBottom: 10 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#92400e' }}>📝 UPCOMING EXAM</span>
-              <div style={{ fontSize: 15, fontWeight: 900, color: '#78350f', marginTop: 2 }}>{exam.name}</div>
-              <div style={{ fontSize: 11, color: '#92400e' }}>{exam.start_date} — {days > 0 ? `In ${days} days` : 'TODAY'}</div>
-            </div>
-          );
-        })}
-
-        {/* Immediate Next Class */}
-        {currentEvent ? (
-          <div className="block-lecture" style={{ marginBottom: 10, background: '#eeeffe' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#e11d48' }}>🔴 LIVE CLASS NOW</span>
-              <span className="legend-pill lecture">{currentEvent.time}</span>
-            </div>
-            <div style={{ fontSize: 16, fontWeight: 900, color: '#1e1b4b', marginTop: 2 }}>{currentEvent.course} {currentEvent.kind === 'lab' ? 'Lab' : ''}</div>
-            <div style={{ fontSize: 12, color: '#4338ca', fontWeight: 600 }}>📍 Confirmed Venue: {currentEvent.venue}</div>
-          </div>
-        ) : nextEvent ? (
-          <div className="block-lecture" style={{ marginBottom: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#4f46e5' }}>⏱ NEXT CLASS TODAY</span>
-              <span className="legend-pill lecture">Starts {nextEvent.time.split('-')[0]}</span>
-            </div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: '#1e1b4b', marginTop: 2 }}>{nextEvent.course} {nextEvent.kind === 'lab' ? 'Lab' : ''}</div>
-            <div style={{ fontSize: 11, color: '#4338ca', fontWeight: 600 }}>📍 Venue: {nextEvent.venue}</div>
-          </div>
-        ) : null}
-
-        {/* Group-Aware Actionable Lab Items */}
-        {labResources.slice(0, 3).map((lab, i) => (
-          <a key={i} href={lab.url} target="_blank" rel="noopener noreferrer" className="block-lab" style={{ display: 'block', marginBottom: 8, textDecoration: 'none' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 10, fontWeight: 800, color: '#92400e', textTransform: 'uppercase' }}>🧪 Lab Report / Worksheet</span>
-              {lab.groupDeadline && (
-                <span className="urgency-badge warning" style={{ fontSize: 10 }}>
-                  Scheduled: {lab.groupDeadline}
-                </span>
-              )}
-            </div>
-            <div className="block-lab-title" style={{ marginTop: 2 }}>{lab.courseId} — {lab.title}</div>
-          </a>
-        ))}
-      </div>
-
-      {/* ── Categorized Workflows ── */}
-      <div className="today-grid">
-        {/* 🧪 Lab Reports & Worksheets Hub */}
-        <div className="card-box">
-          <div className="card-box-header">
-            <span>🧪 Lab Reports & Worksheets</span>
-            <span>{labResources.length} Items</span>
-          </div>
-          {labResources.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', color: '#64748b', fontSize: 13 }}>
-              No lab sheets uploaded yet.
-            </div>
+        {/* Today's Classes */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' }}>Classes & Labs Today</div>
+          {todaySlots.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '8px 0' }}>No classes today 🎉</div>
           ) : (
-            labResources.map((res, i) => (
-              <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="item-row">
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span className="legend-pill lab" style={{ fontSize: 9 }}>{res.courseId}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{res.title}</span>
-                  </div>
-                  {res.groupDeadline && (
-                    <div style={{ fontSize: 11, color: '#92400e', fontWeight: 600, marginTop: 3 }}>
-                      📍 Lab Slot: {res.groupDeadline}
+            todaySlots.map((slot, i) => {
+              const color = COURSE_COLORS[slot.code] ?? '#64748b';
+              const notes = getCourseNotes(overrides.notes, slot.code);
+              return (
+                <div key={i} style={{
+                  background: slot.cancelled ? '#fef2f2' : '#f8fafc',
+                  borderLeft: `4px solid ${slot.cancelled ? '#ef4444' : color}`,
+                  borderRadius: 10, padding: '10px 12px', marginBottom: 8,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 13, fontWeight: 900, color, textDecoration: slot.cancelled ? 'line-through' : 'none' }}>
+                        {slot.cancelled ? '❌ ' : ''}{slot.code} — {slot.course}
+                      </span>
+                      <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: slot.type === 'lab' ? '#fef3c7' : '#e0e7ff', color: slot.type === 'lab' ? '#92400e' : '#3730a3' }}>
+                        {slot.type === 'lab' ? 'Lab' : 'Lec'}
+                      </span>
                     </div>
-                  )}
-                </div>
-                {res.is_new && <span className="urgency-badge safe">NEW</span>}
-              </a>
-            ))
-          )}
-        </div>
-
-        {/* 📝 Tutorial Sheets Queue */}
-        <div className="card-box">
-          <div className="card-box-header">
-            <span>📝 Tutorial Sheets Queue</span>
-            <span>{tutorialResources.length} Sheets</span>
-          </div>
-          {tutorialResources.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', color: '#64748b', fontSize: 13 }}>
-              No tutorial sheets posted yet.
-            </div>
-          ) : (
-            tutorialResources.map((res, i) => (
-              <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="item-row">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span className="legend-pill lecture" style={{ fontSize: 9 }}>{res.courseId}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{res.title}</span>
-                </div>
-                {res.is_new && <span className="urgency-badge safe">NEW</span>}
-              </a>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* 🗓 Upcoming Deadlines (Moodle + Bot Overrides) */}
-      {weekDeadlines.length > 0 && (
-        <div className="card-box">
-          <div className="card-box-header">
-            <span>🗓 Upcoming Deadlines (Next 7 Days)</span>
-            <span>{weekDeadlines.length} Items</span>
-          </div>
-          {weekDeadlines.map((d, i) => {
-            const urgency = getUrgencyLevel(d.due_date);
-            return (
-              <a key={i} href={d.url} target="_blank" rel="noopener noreferrer" className="item-row">
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span className="legend-pill lecture" style={{ fontSize: 9, background: d.courseColor + '22', color: d.courseColor }}>{d.courseId}</span>
-                    {'source' in d && d.source === 'bot' && <span className="urgency-badge warning" style={{ fontSize: 9 }}>BOT</span>}
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{d.title}</span>
+                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>📍 {slot.venue}</div>
+                    {notes.slice(0, 1).map((n, ni) => <NoteChip key={ni} note={n} />)}
                   </div>
-                  {d.note && <div style={{ fontSize: 11, color: '#92400e', marginTop: 2 }}>{d.note}</div>}
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</div>
                 </div>
-                <span className={`urgency-badge ${urgency}`}>{formatTimeUntil(d.due_date)}</span>
-              </a>
-            );
-          })}
+              );
+            })
+          )}
         </div>
-      )}
 
-      {/* 📚 Core Study Decks */}
-      <div className="card-box">
-        <div className="card-box-header">
-          <span>📚 Core Study Decks & Lecture Slides</span>
-          <span>{lectureResources.length} Files</span>
-        </div>
-        {lectureResources.slice(0, 10).map((res, i) => (
-          <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="item-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="legend-pill lecture" style={{ fontSize: 10 }}>{res.courseId}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{res.title}</span>
-            </div>
-            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{formatRelativeTime(res.uploaded_at)}</span>
-          </a>
-        ))}
-      </div>
-
-      {/* 📢 Administrative Notice Board (Collapsed Noise Accordion) */}
-      <div className="card-box">
-        <button
-          onClick={() => setShowNotices(!showNotices)}
-          className="card-box-header"
-          style={{ width: '100%', cursor: 'pointer' }}
-        >
-          <span>📢 Administrative Notices & Seatings ({noticeResources.length})</span>
-          <span>{showNotices ? '▲ Hide' : '▼ View Notices'}</span>
-        </button>
-        {showNotices && (
+        {/* Today's Deadlines */}
+        {todayDeadlines.length > 0 && (
           <div>
-            {noticeResources.length === 0 ? (
-              <div style={{ padding: 20, textAlign: 'center', color: '#64748b', fontSize: 13 }}>
-                No administrative notices.
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#dc2626', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Today</div>
+            {todayDeadlines.map((d, i) => (
+              <div key={i} style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#991b1b' }}>{d.title} ({d.course})</span>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444' }}>{formatTimeUntil(d.due_date)}</span>
               </div>
-            ) : (
-              noticeResources.map((res, i) => (
-                <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="item-row">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span className="legend-pill lab" style={{ fontSize: 10 }}>{res.courseId}</span>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>{res.title}</span>
-                  </div>
-                  <span style={{ fontSize: 11, color: '#94a3b8' }}>Notice</span>
-                </a>
-              ))
-            )}
+            ))}
           </div>
         )}
       </div>
+
+      {/* ── 2. TOMORROW'S ACTION PLAN ── */}
+      <div style={{
+        background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px', marginBottom: 20,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 18 }}>🔜</span>
+            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#334155', margin: 0 }}>TOMORROW'S ACTION PLAN</h2>
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: 12 }}>
+            {tomorrowName.toUpperCase()}
+          </span>
+        </div>
+
+        {/* Tomorrow's Classes */}
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' }}>Tomorrow's Schedule</div>
+          {tomorrowSlots.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '8px 0' }}>No classes tomorrow 🎉</div>
+          ) : (
+            tomorrowSlots.map((slot, i) => {
+              const color = COURSE_COLORS[slot.code] ?? '#64748b';
+              return (
+                <div key={i} style={{
+                  background: '#f8fafc', borderLeft: `4px solid ${color}`, borderRadius: 10, padding: '10px 12px', marginBottom: 6,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 800, color }}>{slot.code} — {slot.course}</span>
+                    <div style={{ fontSize: 11, color: '#64748b' }}>📍 {slot.venue}</div>
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</span>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Tomorrow's Deadlines */}
+        {tomorrowDeadlines.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Tomorrow</div>
+            {tomorrowDeadlines.map((d, i) => (
+              <div key={i} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#92400e' }}>{d.title} ({d.course})</span>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#f59e0b' }}>{formatTimeUntil(d.due_date)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── 3. THIS WEEK'S ACTION PLAN ── */}
+      <div style={{
+        background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px', marginBottom: 20
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 18 }}>🗓</span>
+            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#334155', margin: 0 }}>THIS WEEK'S DEADLINES & GOALS</h2>
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b' }}>{thisWeekDeadlines.length} items</span>
+        </div>
+
+        {thisWeekDeadlines.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '8px 0' }}>No more deadlines this week 🎉</div>
+        ) : (
+          thisWeekDeadlines.map((d, i) => {
+            const urgency = getUrgencyLevel(d.due_date);
+            const color = COURSE_COLORS[d.course] ?? '#64748b';
+            return (
+              <a key={i} href={d.url} target="_blank" rel="noopener noreferrer" style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '10px 12px', borderBottom: i < thisWeekDeadlines.length - 1 ? '1px solid #f1f5f9' : 'none',
+                textDecoration: 'none'
+              }}>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{d.title}</span>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, color, background: color + '15', padding: '1px 6px', borderRadius: 4 }}>{d.course}</span>
+                    {d.source === 'bot' && <span style={{ fontSize: 10, fontWeight: 800, color: '#7c3aed', background: '#f3e8ff', padding: '1px 6px', borderRadius: 4 }}>BOT</span>}
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 900, color: urgency === 'critical' ? '#ef4444' : '#f59e0b' }}>
+                  {formatTimeUntil(d.due_date)}
+                </span>
+              </a>
+            );
+          })
+        )}
+      </div>
+
     </div>
   );
 }

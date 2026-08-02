@@ -304,6 +304,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 import threading
+import time
+import urllib.request
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
@@ -316,8 +318,28 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass # suppress HTTP logs
 
+def _keep_alive_loop():
+    """Periodically ping self endpoint every 10 minutes to prevent Render free instance sleep."""
+    render_url = os.environ.get("RENDER_EXTERNAL_URL")
+    if not render_url:
+        return
+    print(f"[BOT] Render Keep-Alive active for: {render_url}")
+    while True:
+        try:
+            time.sleep(600)  # Ping every 10 minutes
+            req = urllib.request.Request(
+                f"{render_url.rstrip('/')}/",
+                headers={"User-Agent": "RenderKeepAlive/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=10):
+                pass
+        except Exception:
+            pass
+
 def start_health_server():
     port = int(os.environ.get("PORT", 8080))
+    # Start self keep-alive thread
+    threading.Thread(target=_keep_alive_loop, daemon=True).start()
     try:
         server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
         server.serve_forever()

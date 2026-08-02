@@ -55,7 +55,7 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
 
       {/* ── Exam Banner ── */}
-      {nextExam && <ExamBanner exam={nextExam} />}
+      <ExamBanner exams={overrides.exams} />
 
       {/* ── Day Selector ── */}
       <div style={{

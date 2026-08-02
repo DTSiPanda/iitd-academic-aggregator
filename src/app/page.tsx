@@ -18,10 +18,10 @@ const STORAGE_GROUP = 'iitd_lab_group';
 type Tab = 'today' | 'week' | 'courses' | 'calendar';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'today',    label: 'Today',     icon: '⚡' },
-  { id: 'week',     label: 'This Week',  icon: '🗓' },
-  { id: 'courses',  label: 'Courses',   icon: '📚' },
-  { id: 'calendar', label: 'Calendar',  icon: '📅' },
+  { id: 'today',    label: 'Action Plans', icon: '⚡' },
+  { id: 'week',     label: 'Timetable',    icon: '🗓' },
+  { id: 'calendar', label: 'Calendar',     icon: '📅' },
+  { id: 'courses',  label: 'Courses',      icon: '📚' },
 ];
 
 function SyncBadge({ lastUpdated }: { lastUpdated: string }) {

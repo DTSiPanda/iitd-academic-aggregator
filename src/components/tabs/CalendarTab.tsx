@@ -2,20 +2,33 @@
 
 import { useState } from 'react';
 import { AggregatorData, LabGroup } from '@/types/schema';
-import { getUrgencyLevel, formatTimeUntil } from '@/lib/fetchData';
+import { getUrgencyLevel, formatTimeUntil, getSemesterWeekInfo } from '@/lib/fetchData';
 
 interface Props {
   data: AggregatorData;
   labGroup: LabGroup;
 }
 
-const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function CalendarTab({ data, labGroup }: Props) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState<Date | null>(today);
+
+  const weekInfo = getSemesterWeekInfo(
+    data.semester_timeline?.start_date || '2026-08-01',
+    data.semester_timeline?.total_weeks || 16
+  );
+
+  const milestones = data.semester_timeline?.milestones || [
+    { name: 'Semester Begins', date: '2026-08-01', type: 'info' },
+    { name: 'Minor 1 Exams', date: '2026-09-18', type: 'exam' },
+    { name: 'Mid-Semester Break', date: '2026-10-12', type: 'break' },
+    { name: 'Minor 2 Exams', date: '2026-10-24', type: 'exam' },
+    { name: 'Major / Endsem Exams', date: '2026-11-20', type: 'exam' },
+  ];
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -43,7 +56,6 @@ export default function CalendarTab({ data, labGroup }: Props) {
   const isToday = (d: number) => today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
   const isSelected = (d: number) => selected?.getDate() === d && selected?.getMonth() === month && selected?.getFullYear() === year;
 
-  // Selected day events
   const selectedKey = selected ? `${selected.getFullYear()}-${selected.getMonth()}-${selected.getDate()}` : '';
   const selectedDeadlines = deadlinesByDate[selectedKey] || [];
 
@@ -51,59 +63,124 @@ export default function CalendarTab({ data, labGroup }: Props) {
   const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
 
   return (
-    <div className="calendar-layout">
-      <div className="cal-card">
-        <div className="cal-nav-bar">
-          <button className="legend-pill lecture" onClick={prevMonth}>‹ Previous</button>
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{MONTHS[month]} {year}</span>
-          <button className="legend-pill lecture" onClick={nextMonth}>Next ›</button>
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
+
+      {/* ── Semester Progress & Week Tracker Card ── */}
+      <div style={{
+        background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px', marginBottom: 20,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <div>
+            <span style={{ fontSize: 11, fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: 1 }}>
+              SEMESTER TIMELINE
+            </span>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a', marginTop: 2 }}>
+              Week {weekInfo.currentWeek} of {weekInfo.totalWeeks}
+            </div>
+          </div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#64748b', background: '#f1f5f9', padding: '4px 10px', borderRadius: 12 }}>
+            {weekInfo.progressPercent}% Complete
+          </div>
         </div>
 
-        <div className="cal-grid-view">
-          {DAYS_SHORT.map(d => (
-            <div key={d} className="cal-header-cell">{d}</div>
-          ))}
-          {cells.map((d, i) => {
-            if (!d) return <div key={i} style={{ background: '#f8fafc' }} />;
-            const dots = deadlinesByDate[getKey(d)] || [];
+        {/* Progress bar */}
+        <div style={{ width: '100%', height: 8, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
+          <div style={{ width: `${weekInfo.progressPercent}%`, height: '100%', background: '#4f46e5', borderRadius: 4, transition: 'width 0.3s' }} />
+        </div>
+
+        {/* Milestones list */}
+        <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 8, textTransform: 'uppercase' }}>Key Academic Milestones</div>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+          {milestones.map((m, i) => {
+            const isExam = m.type === 'exam';
+            const daysLeft = Math.ceil((new Date(m.date).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             return (
-              <div
-                key={i}
-                className={`cal-day-cell ${isToday(d) ? 'today' : ''} ${isSelected(d) ? 'selected' : ''}`}
-                onClick={() => setSelected(new Date(year, month, d))}
-              >
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{d}</span>
-                {dots.length > 0 && (
-                  <div className="cal-dot-indicator" style={{ background: '#e11d48' }} />
-                )}
+              <div key={i} style={{
+                flex: '0 0 auto', padding: '8px 12px', borderRadius: 10,
+                background: isExam ? '#fff7ed' : '#f8fafc',
+                border: `1px solid ${isExam ? '#fde68a' : '#e2e8f0'}`,
+                fontSize: 11
+              }}>
+                <div style={{ fontWeight: 800, color: isExam ? '#92400e' : '#334155' }}>{m.name}</div>
+                <div style={{ color: isExam ? '#b45309' : '#64748b', fontSize: 10, marginTop: 2 }}>
+                  {m.date} • {daysLeft > 0 ? `In ${daysLeft}d` : 'Passed'}
+                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="cal-card" style={{ padding: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', marginBottom: 14 }}>
-          {selected ? selected.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' }) : 'Select Date'}
-        </h3>
-        {selectedDeadlines.length === 0 ? (
-          <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center', padding: '24px 0' }}>
-            No deadlines scheduled for this date.
-          </div>
-        ) : (
-          selectedDeadlines.map((ev, i) => (
-            <a key={i} href={ev.url} target="_blank" rel="noopener noreferrer" className="item-row" style={{ padding: '10px 0' }}>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>{ev.title}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#4f46e5' }}>{ev.courseId}</div>
-              </div>
-              <span className={`urgency-badge ${getUrgencyLevel(ev.due_date)}`}>
-                {formatTimeUntil(ev.due_date)}
-              </span>
-            </a>
-          ))
-        )}
+      {/* ── Month Calendar Card ── */}
+      <div style={{
+        background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px', marginBottom: 20
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <button onClick={prevMonth} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: 8, background: '#fff', fontSize: 13, cursor: 'pointer', fontWeight: 800 }}>‹ Prev</button>
+          <span style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>{MONTHS[month]} {year}</span>
+          <button onClick={nextMonth} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: 8, background: '#fff', fontSize: 13, cursor: 'pointer', fontWeight: 800 }}>Next ›</button>
+        </div>
+
+        {/* Day Header */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, textAlign: 'center', fontWeight: 800, fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+          {DAYS_SHORT.map(d => <div key={d}>{d}</div>)}
+        </div>
+
+        {/* Calendar Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          {cells.map((d, i) => {
+            if (!d) return <div key={i} style={{ height: 44 }} />;
+            const key = getKey(d);
+            const events = deadlinesByDate[key] || [];
+            const isT = isToday(d);
+            const isS = isSelected(d);
+
+            return (
+              <button
+                key={i}
+                onClick={() => setSelected(new Date(year, month, d))}
+                style={{
+                  height: 44, borderRadius: 8, border: isS ? '2px solid #4f46e5' : isT ? '2px solid #38bdf8' : '1px solid #f1f5f9',
+                  background: isS ? '#4f46e5' : isT ? '#f0f9ff' : '#fff',
+                  color: isS ? '#fff' : isT ? '#0284c7' : '#0f172a',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', position: 'relative'
+                }}
+              >
+                <span style={{ fontSize: 12, fontWeight: isS || isT ? 900 : 600 }}>{d}</span>
+                {events.length > 0 && (
+                  <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
+                    {events.slice(0, 3).map((_, ei) => (
+                      <span key={ei} style={{ width: 4, height: 4, borderRadius: '50%', background: isS ? '#fff' : '#ef4444' }} />
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Selected Day Deadlines Detail */}
+      {selected && (
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px' }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>
+            📅 {selected.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </div>
+          {selectedDeadlines.length === 0 ? (
+            <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>No deadlines on this date</div>
+          ) : (
+            selectedDeadlines.map((ev, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < selectedDeadlines.length - 1 ? '1px solid #e2e8f0' : 'none' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{ev.title} ({ev.courseId})</span>
+                <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 800 }}>{formatTimeUntil(ev.due_date)}</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

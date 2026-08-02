@@ -24,6 +24,32 @@ export async function fetchData(): Promise<AggregatorData> {
   return res.json();
 }
 
+export interface SemesterWeekInfo {
+  currentWeek: number;
+  totalWeeks: number;
+  progressPercent: number;
+  startDate: string;
+  endDate: string;
+}
+
+export function getSemesterWeekInfo(startDateStr = '2026-08-01', totalWeeks = 16): SemesterWeekInfo {
+  const start = new Date(startDateStr);
+  const now = new Date();
+  const diffTime = Math.max(0, now.getTime() - start.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const currentWeek = Math.min(totalWeeks, Math.floor(diffDays / 7) + 1);
+  const progressPercent = Math.min(100, Math.round((currentWeek / totalWeeks) * 100));
+  const end = new Date(start.getTime() + totalWeeks * 7 * 24 * 60 * 60 * 1000);
+
+  return {
+    currentWeek,
+    totalWeeks,
+    progressPercent,
+    startDate: startDateStr,
+    endDate: end.toISOString().split('T')[0],
+  };
+}
+
 export async function fetchOverrides(): Promise<Overrides> {
   try {
     // 1. Try Supabase DB
@@ -69,6 +95,18 @@ export function getNextExam(exams: Overrides['exams']) {
     .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0] ?? null;
 }
 
+
+export function getResourceUrl(courseId: string, res: { title: string; url: string; type?: string }): string {
+  if (!res.url) return '#';
+  if (res.url.startsWith('/files/')) return res.url;
+  
+  // If it's a Moodle file link, resolve to static downloaded PDF
+  if (res.url.includes('moodle.iitd.ac.in/mod/resource/')) {
+    const safeTitle = res.title.replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/^_|_$/g, '');
+    return `/files/${courseId}/${safeTitle}.pdf`;
+  }
+  return res.url;
+}
 
 export function getUrgencyLevel(dueDateISO: string | null): 'overdue' | 'critical' | 'warning' | 'safe' {
   if (!dueDateISO) return 'safe';

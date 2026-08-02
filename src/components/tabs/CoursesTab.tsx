@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Course, Resource, Overrides } from '@/types/schema';
-import { getCourseNotes } from '@/lib/fetchData';
+import { getCourseNotes, getResourceUrl } from '@/lib/fetchData';
 
 interface Props {
   courses: Course[];
@@ -110,7 +110,7 @@ export default function CoursesTab({ courses, overrides }: Props) {
                       f => f.course === course.id && f.title === res.title
                     );
                     return (
-                      <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="resource-row">
+                      <a key={i} href={getResourceUrl(course.id, res)} target="_blank" rel="noopener noreferrer" className="resource-row">
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <span>{getFileIcon(res)}</span>
                           <span>{isFlagged ? '⭐ ' : ''}{res.title}</span>
