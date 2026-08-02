@@ -55,7 +55,15 @@ export default function App() {
       .then(setData)
       .catch(() => setError('Could not load data.json. Run the scraper first.'))
       .finally(() => setLoading(false));
+
     fetchOverrides().then(setOverrides);
+
+    // Live sync: poll for new Telegram bot overrides every 8 seconds
+    const interval = setInterval(() => {
+      fetchOverrides().then(setOverrides);
+    }, 8000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

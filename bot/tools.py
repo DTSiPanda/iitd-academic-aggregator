@@ -93,6 +93,16 @@ def _push_to_github_api(content_str: str):
         print(f"[bot] Exception during GitHub API sync: {e}")
 
 
+def _trigger_vercel_deploy():
+    hook_url = os.getenv("VERCEL_DEPLOY_HOOK")
+    if hook_url:
+        try:
+            requests.post(hook_url)
+            print("[bot] Triggered Vercel Deploy Hook!")
+        except Exception as e:
+            print(f"[bot] Deploy hook error: {e}")
+
+
 def _save(data: dict):
     content_str = json.dumps(data, indent=2, ensure_ascii=False)
     with open(OVERRIDES_PATH, "w", encoding="utf-8") as f:
@@ -107,6 +117,7 @@ def _save(data: dict):
 
     # Push to GitHub API so Vercel & Raw GitHub content get updated immediately
     _push_to_github_api(content_str)
+    _trigger_vercel_deploy()
 
 
 def _next_weekday_date(day_name: str, from_date: datetime = None) -> datetime:
