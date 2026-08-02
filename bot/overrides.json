@@ -1,7 +1,18 @@
 {
   "cancellations": [],
   "deadline_overrides": [],
-  "exams": [],
+  "exams": [
+    {
+      "name": "Minor 1",
+      "start_date": "2026-09-18",
+      "end_date": "2026-09-18",
+      "courses": [
+        "CVL2702"
+      ],
+      "note": "",
+      "added_at": "2026-08-02T21:10:58.592439"
+    }
+  ],
   "notes": [],
   "flagged": [],
   "lab_done": []

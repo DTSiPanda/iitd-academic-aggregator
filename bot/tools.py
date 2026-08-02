@@ -115,32 +115,60 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
         _save(data)
         return f"❌ Noted — {args['course']} on {args['day']} marked as cancelled."
 
+def _fix_year(date_str: str) -> str:
+    if not date_str:
+        return date_str
+    for past in ["2025-", "2024-", "2023-"]:
+        if date_str.startswith(past):
+            return date_str.replace(past, "2026-", 1)
+    return date_str
+
+
+def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
+    data = _load()
+
+    if tool_name == "cancel_class":
+        entry = {
+            "course": args["course"],
+            "day": args["day"],
+            "date": args.get("date"),
+            "note": args.get("note", ""),
+            "added_at": datetime.now().isoformat()
+        }
+        data["cancellations"].append(entry)
+        _save(data)
+        return f"❌ Noted — {args['course']} on {args['day']} marked as cancelled."
+
     elif tool_name == "override_deadline":
+        due_date = _fix_year(args["due_date"])
         entry = {
             "course": args["course"],
             "item": args["item"],
-            "due_date": args["due_date"],
+            "due_date": due_date,
             "note": args.get("note", ""),
             "added_at": datetime.now().isoformat()
         }
         data["deadline_overrides"].append(entry)
         _save(data)
-        return f"📅 Got it — {args['item']} ({args['course']}) deadline set to {args['due_date']}."
+        return f"📅 Got it — {args['item']} ({args['course']}) deadline set to {due_date}."
 
     elif tool_name == "add_exam":
+        s_date = _fix_year(args["start_date"])
+        e_date = _fix_year(args.get("end_date", s_date))
         # Remove existing exam with same name if present
         data["exams"] = [e for e in data["exams"] if e.get("name") != args["name"]]
         entry = {
             "name": args["name"],
-            "start_date": args["start_date"],
-            "end_date": args["end_date"],
+            "start_date": s_date,
+            "end_date": e_date,
             "courses": args.get("courses", []),
             "note": args.get("note", ""),
             "added_at": datetime.now().isoformat()
         }
         data["exams"].append(entry)
         _save(data)
-        return f"📝 Exam added — {args['name']}: {args['start_date']} → {args['end_date']}."
+        courses_txt = f" ({', '.join(args['courses'])})" if args.get("courses") else ""
+        return f"📝 Exam added — {args['name']}{courses_txt}: {s_date} → {e_date}."
 
     elif tool_name == "add_note":
         entry = {
