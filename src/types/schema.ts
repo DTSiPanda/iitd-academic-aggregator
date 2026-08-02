@@ -90,6 +90,7 @@ export interface DeadlineOverride {
   due_date: string;
   scope?: 'groupwise' | 'wholeclass';
   group?: string;
+  group_deadlines?: Record<string, string>;
   note?: string;
   added_at: string;
 }

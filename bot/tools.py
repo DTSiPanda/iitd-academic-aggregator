@@ -129,19 +129,24 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
         due_date = _fix_year(args.get("due_date"))
         scope = args.get("scope", "wholeclass")
         course = args["course"]
+        group_deadlines = {}
 
-        # If scope is groupwise OR course is a lab without explicit due_date
-        if scope == "groupwise" or (course.startswith("CVP") and not due_date):
-            lab_info = LAB_GROUP_SCHEDULE.get(user_group, {}).get(course)
-            if lab_info:
-                next_lab = _next_weekday_date(lab_info["day"])
-                h, m = map(int, lab_info["time"].split(":"))
-                due_dt = next_lab.replace(hour=h, minute=m, second=0)
-                due_date = due_dt.strftime("%Y-%m-%dT%H:%M:00")
-                scope_label = f"Groupwise [{user_group.upper()} slot: {lab_info['day']} {lab_info['time']}]"
-            else:
-                due_date = due_date or datetime.now().strftime("%Y-%m-%dT17:00:00")
-                scope_label = f"Groupwise [{user_group.upper()}]"
+        if scope == "groupwise" or course.startswith("CVP") or (course == "MEP1000" and "lab" in args.get("item","").lower()):
+            scope = "groupwise"
+            for g_id in ["group1", "group2", "group3", "group4"]:
+                info = LAB_GROUP_SCHEDULE.get(g_id, {}).get(course)
+                if info:
+                    next_lab = _next_weekday_date(info["day"])
+                    h, m = map(int, info["time"].split(":"))
+                    dt = next_lab.replace(hour=h, minute=m, second=0)
+                    group_deadlines[g_id] = dt.strftime("%Y-%m-%dT%H:%M:00")
+
+            if not due_date and user_group in group_deadlines:
+                due_date = group_deadlines[user_group]
+            elif not due_date:
+                due_date = datetime.now().strftime("%Y-%m-%dT17:00:00")
+
+            scope_label = "Groupwise (Calculated for All Groups 1-4)"
         else:
             due_date = due_date or datetime.now().strftime("%Y-%m-%dT17:00:00")
             scope_label = "Whole Class"
@@ -151,13 +156,13 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
             "item": args["item"],
             "due_date": due_date,
             "scope": scope,
-            "group": user_group if scope == "groupwise" else "all",
+            "group_deadlines": group_deadlines if scope == "groupwise" else {},
             "note": args.get("note", ""),
             "added_at": datetime.now().isoformat()
         }
         data["deadline_overrides"].append(entry)
         _save(data)
-        return f"📅 Got it — {args['item']} ({course}) set to {due_date} ({scope_label})."
+        return f"📅 Got it — {args['item']} ({course}) deadline set ({scope_label})."
 
     elif tool_name == "add_exam":
         s_date = _fix_year(args["start_date"])
