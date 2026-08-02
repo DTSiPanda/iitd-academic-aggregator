@@ -57,12 +57,17 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
     });
   });
 
-  // 2. Bot deadline overrides
+  // 2. Bot deadline overrides (resolved for active labGroup)
   overrides.deadline_overrides.forEach(d => {
-    const dateObj = new Date(d.due_date);
+    let resolvedDate = d.due_date;
+    if (d.scope === 'groupwise' && d.group_deadlines && d.group_deadlines[labGroup]) {
+      resolvedDate = d.group_deadlines[labGroup];
+    }
+    const dateObj = new Date(resolvedDate);
+    if (isNaN(dateObj.getTime())) return;
     const key = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
     if (!eventsByDate[key]) eventsByDate[key] = [];
-    eventsByDate[key].push({ title: d.item, courseId: d.course, type: 'bot', url: '#', due_date: d.due_date });
+    eventsByDate[key].push({ title: d.item, courseId: d.course, type: 'bot', url: '#', due_date: resolvedDate });
   });
 
   // 3. Bot exam entries

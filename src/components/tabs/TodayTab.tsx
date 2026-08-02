@@ -1,7 +1,7 @@
 'use client';
 
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
-import { getSemesterWeekInfo, isClassCancelled, formatDueDateWithDay } from '@/lib/fetchData';
+import { getSemesterWeekInfo, isClassCancelled, formatDueDateWithDay, formatTimeUntil } from '@/lib/fetchData';
 import { LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
 import ExamBanner from '@/components/ui/ExamBanner';
 
@@ -66,6 +66,7 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
 
   const todayDeadlines = allDeadlines.filter(d => d.due_date <= todayEnd);
   const tomorrowDeadlines = allDeadlines.filter(d => d.due_date > todayEnd && d.due_date <= tomorrowEnd);
+  const upcomingDeadlines = allDeadlines.filter(d => d.due_date > tomorrowEnd);
 
   // Next upcoming quiz
   const nextQuiz = resolvedOverrides[0] || null;
@@ -97,7 +98,7 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
           <div style={{ background: '#ffffff15', border: '1px solid #ffffff25', padding: '8px 12px', borderRadius: 10, textAlign: 'right' }}>
             <div style={{ fontSize: 10, fontWeight: 900, color: '#f8fafc', textTransform: 'uppercase' }}>NEXT QUIZ / TEST</div>
             <div style={{ fontSize: 13, fontWeight: 800, color: '#38bdf8', marginTop: 1 }}>{nextQuiz.course} — {nextQuiz.item}</div>
-            <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700 }}>{daysLeftQuiz === 0 ? 'TODAY' : `In ${daysLeftQuiz}d`}</div>
+            <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700 }}>{formatDueDateWithDay(nextQuiz.due_date)}</div>
           </div>
         ) : (
           <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
@@ -156,9 +157,12 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
             <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #fee2e2' }}>
               <div style={{ fontSize: 11, fontWeight: 900, color: '#dc2626', marginBottom: 6, textTransform: 'uppercase' }}>🚨 Due Today</div>
               {todayDeadlines.map((d, i) => (
-                <div key={i} style={{ background: '#fef2f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#9f1239' }}>{d.course} — {d.title}</span>
-                  <span style={{ fontSize: 11, fontWeight: 900, color: '#dc2626' }}>TODAY</span>
+                <div key={i} style={{ background: '#fef2f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '10px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#9f1239' }}>{d.course} — {d.title}</span>
+                    <div style={{ fontSize: 11, color: '#b91c1c', fontWeight: 700, marginTop: 2 }}>{formatDueDateWithDay(d.due_date)}</div>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: '#dc2626', background: '#fee2e2', padding: '3px 8px', borderRadius: 6 }}>TODAY</span>
                 </div>
               ))}
             </div>
@@ -202,6 +206,45 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
               );
             })
           )}
+
+          {/* Due Tomorrow */}
+          {tomorrowDeadlines.length > 0 && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #fef3c7' }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: '#b45309', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Tomorrow</div>
+              {tomorrowDeadlines.map((d, i) => (
+                <div key={i} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '10px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#78350f' }}>{d.course} — {d.title}</span>
+                    <div style={{ fontSize: 11, color: '#b45309', fontWeight: 700, marginTop: 2 }}>{formatDueDateWithDay(d.due_date)}</div>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: '#b45309', background: '#fef3c7', padding: '3px 8px', borderRadius: 6 }}>TOMORROW</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 3. UPCOMING DEADLINES THIS WEEK ── */}
+      {upcomingDeadlines.length > 0 && (
+        <div style={{
+          background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: '16px 20px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 900, color: '#4f46e5', marginBottom: 10, textTransform: 'uppercase' }}>
+            📅 Upcoming This Week
+          </div>
+          {upcomingDeadlines.map((d, i) => (
+            <div key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{d.course} — {d.title}</span>
+                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginTop: 2 }}>{formatDueDateWithDay(d.due_date)}</div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#4f46e5', background: '#eef2ff', padding: '4px 8px', borderRadius: 6 }}>
+                {formatTimeUntil(d.due_date)}
+              </span>
+            </div>
+          ))}
         </div>
       )}
 
