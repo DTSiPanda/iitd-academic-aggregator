@@ -1,4 +1,5 @@
 import { AggregatorData, Overrides } from '@/types/schema';
+import { supabase } from '@/lib/supabaseClient';
 
 const EMPTY_OVERRIDES: Overrides = {
   cancellations: [],
@@ -9,8 +10,15 @@ const EMPTY_OVERRIDES: Overrides = {
   lab_done: [],
 };
 
-// In production, these are served from /public/ by Next.js
 export async function fetchData(): Promise<AggregatorData> {
+  try {
+    const { data } = await supabase.from('moodle_data').select('data').eq('id', 'current_data').single();
+    if (data && data.data && Object.keys(data.data).length > 0) {
+      return data.data as AggregatorData;
+    }
+  } catch {
+    // fallback to static file
+  }
   const res = await fetch('/data.json', { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch data.json');
   return res.json();
@@ -18,14 +26,18 @@ export async function fetchData(): Promise<AggregatorData> {
 
 export async function fetchOverrides(): Promise<Overrides> {
   try {
-    // 1. Try local / public overrides with cache busting
+    // 1. Try Supabase DB
+    const { data } = await supabase.from('overrides').select('data').eq('id', 'user_overrides').single();
+    if (data && data.data) {
+      return data.data as Overrides;
+    }
+  } catch {
+    // fallback
+  }
+
+  try {
     const res = await fetch(`/overrides.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) return await res.json();
-
-    // 2. Fallback to GitHub Raw Content (always fresh from Bot commits)
-    const rawRes = await fetch(`https://raw.githubusercontent.com/DTSiPanda/iitd-academic-aggregator/main/public/overrides.json?t=${Date.now()}`);
-    if (rawRes.ok) return await rawRes.json();
-
     return EMPTY_OVERRIDES;
   } catch {
     return EMPTY_OVERRIDES;

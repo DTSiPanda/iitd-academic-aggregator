@@ -46,61 +46,31 @@ DAY_TO_INT = {
 }
 
 
-import base64
-import requests
+from supabase import create_client
 
 PUBLIC_OVERRIDES_PATH = os.path.join(os.path.dirname(__file__), "..", "public", "overrides.json")
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreXJxdWZidmFpcXJobGprY3VzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NTY3MzY0MCwiZXhwIjoyMTAxMjQ5NjQwfQ.jgn76pM-QDaSD0jseu1h_kgZGyL_59_gQH3jh157Ids")
 
 def _load() -> dict:
     with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def _push_to_github_api(content_str: str):
-    token = os.getenv("GITHUB_TOKEN")
-    repo  = os.getenv("GITHUB_REPO", "DTSiPanda/iitd-academic-aggregator")
-    if not token:
+def _push_to_supabase(data: dict):
+    if not SUPABASE_KEY:
         return
-
-    url = f"https://api.github.com/repos/{repo}/contents/public/overrides.json"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json",
-    }
-
     try:
-        # Get existing file sha
-        sha = None
-        get_res = requests.get(url, headers=headers)
-        if get_res.status_code == 200:
-            sha = get_res.json().get("sha")
-
-        encoded_content = base64.b64encode(content_str.encode("utf-8")).decode("utf-8")
-        payload = {
-            "message": "auto: update overrides via Telegram bot",
-            "content": encoded_content,
-            "branch": "main",
-        }
-        if sha:
-            payload["sha"] = sha
-
-        put_res = requests.put(url, headers=headers, json=payload)
-        if put_res.status_code in (200, 201):
-            print("[bot] Successfully synced overrides.json -> GitHub Repo!")
-        else:
-            print(f"[bot] GitHub API sync failed: {put_res.status_code} {put_res.text}")
+        sp = create_client(SUPABASE_URL, SUPABASE_KEY)
+        sp.table("overrides").upsert({
+            "id": "user_overrides",
+            "data": data,
+            "updated_at": datetime.now().isoformat()
+        }).execute()
+        print("[bot] Successfully synced overrides -> Supabase DB!")
     except Exception as e:
-        print(f"[bot] Exception during GitHub API sync: {e}")
-
-
-def _trigger_vercel_deploy():
-    hook_url = os.getenv("VERCEL_DEPLOY_HOOK")
-    if hook_url:
-        try:
-            requests.post(hook_url)
-            print("[bot] Triggered Vercel Deploy Hook!")
-        except Exception as e:
-            print(f"[bot] Deploy hook error: {e}")
+        print(f"[bot] Supabase sync warning: {e}")
 
 
 def _save(data: dict):
@@ -108,16 +78,14 @@ def _save(data: dict):
     with open(OVERRIDES_PATH, "w", encoding="utf-8") as f:
         f.write(content_str)
     
-    # Also write to public/ overrides for local dev
     try:
         with open(PUBLIC_OVERRIDES_PATH, "w", encoding="utf-8") as f:
             f.write(content_str)
     except Exception:
         pass
 
-    # Push to GitHub API so Vercel & Raw GitHub content get updated immediately
-    _push_to_github_api(content_str)
-    _trigger_vercel_deploy()
+    # Push to Supabase DB (Realtime instant update!)
+    _push_to_supabase(data)
 
 
 def _next_weekday_date(day_name: str, from_date: datetime = None) -> datetime:

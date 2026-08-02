@@ -38,6 +38,8 @@ function SyncBadge({ lastUpdated }: { lastUpdated: string }) {
   );
 }
 
+import { supabase } from '@/lib/supabaseClient';
+
 const EMPTY_OVERRIDES: Overrides = { cancellations: [], deadline_overrides: [], exams: [], notes: [], flagged: [], lab_done: [] };
 
 export default function App() {
@@ -55,15 +57,26 @@ export default function App() {
       .then(setData)
       .catch(() => setError('Could not load data.json. Run the scraper first.'))
       .finally(() => setLoading(false));
-
     fetchOverrides().then(setOverrides);
 
-    // Live sync: poll for new Telegram bot overrides every 8 seconds
-    const interval = setInterval(() => {
-      fetchOverrides().then(setOverrides);
-    }, 8000);
+    // Supabase Realtime Subscription — Live instant updates without page refresh!
+    const channel = supabase
+      .channel('realtime_academic')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'overrides' }, (payload: any) => {
+        if (payload.new && payload.new.data) {
+          setOverrides(payload.new.data);
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'moodle_data' }, (payload: any) => {
+        if (payload.new && payload.new.data) {
+          setData(payload.new.data);
+        }
+      })
+      .subscribe();
 
-    return () => clearInterval(interval);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

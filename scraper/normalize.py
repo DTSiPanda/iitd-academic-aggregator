@@ -300,3 +300,19 @@ def write_data_json(payload: dict, output_path: str):
     print(f"\n[+] data.json written -> {output_path}")
     print(f"   Courses: {len(payload['courses'])}")
     print(f"   Last updated: {payload['last_updated']}")
+
+    # Push to Supabase DB if credentials are present
+    sp_url = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.co")
+    sp_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreXJxdWZidmFpcXJobGprY3VzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NTY3MzY0MCwiZXhwIjoyMTAxMjQ5NjQwfQ.jgn76pM-QDaSD0jseu1h_kgZGyL_59_gQH3jh157Ids")
+    if sp_key:
+        try:
+            from supabase import create_client
+            sp = create_client(sp_url, sp_key)
+            sp.table("moodle_data").upsert({
+                "id": "current_data",
+                "data": payload,
+                "updated_at": datetime.now().isoformat()
+            }).execute()
+            print("   [+] Successfully synced moodle_data -> Supabase DB!")
+        except Exception as e:
+            print(f"   [!] Supabase sync warning: {e}")
