@@ -33,9 +33,10 @@ DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "public", "data.j
 async def main():
     moodle_session = os.environ.get("MOODLE_SESSION", "").strip()
     moodlenew_session = os.environ.get("MOODLENEW_SESSION", "").strip()
+    kerberos_id = os.environ.get("KERBEROS_ID", "").strip() or os.environ.get("KERBEROS_USER", "").strip()
 
-    if not moodle_session or not moodlenew_session:
-        print("❌ Missing session cookies. Set MOODLE_SESSION and MOODLENEW_SESSION env vars.")
+    if not moodle_session and not moodlenew_session and not kerberos_id:
+        print("❌ Missing session cookies and Kerberos ID. Set MOODLE_SESSION/MOODLENEW_SESSION or KERBEROS_ID/KERBEROS_PASS env vars.")
         sys.exit(1)
 
     print("[*] Starting Moodle scrape...\n")

@@ -37,11 +37,11 @@ class MoodleScraper:
         }])
 
     async def _auto_login(self, page: Page) -> bool:
-        """Auto-login using KERBEROS_USER & KERBEROS_PASS with captcha solving."""
-        user = os.environ.get("KERBEROS_USER", "").strip()
+        """Auto-login using KERBEROS_ID / KERBEROS_USER & KERBEROS_PASS with captcha solving."""
+        user = os.environ.get("KERBEROS_USER", "").strip() or os.environ.get("KERBEROS_ID", "").strip()
         password = os.environ.get("KERBEROS_PASS", "").strip()
         if not user or not password:
-            print(f"  [{self.label}] ⚠️ Session expired and KERBEROS_USER/KERBEROS_PASS not set in .env")
+            print(f"  [{self.label}] ⚠️ Session expired and KERBEROS_ID/KERBEROS_PASS not set in .env")
             return False
 
         print(f"  [{self.label}] 🔑 Attempting auto-login for user '{user}'...")
