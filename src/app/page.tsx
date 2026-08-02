@@ -2,11 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
-import { fetchData, fetchOverrides, formatSyncAge } from '@/lib/fetchData';
+import { fetchData, fetchOverrides } from '@/lib/fetchData';
 import dynamic from 'next/dynamic';
 import GroupSelectorModal from '@/components/GroupSelectorModal';
 import GlobalSearch from '@/components/GlobalSearch';
-import SemesterTimelineHeader from '@/components/SemesterTimelineHeader';
 
 const TodayTab    = dynamic(() => import('@/components/tabs/TodayTab'));
 const WeekTab     = dynamic(() => import('@/components/tabs/WeekTab'));
@@ -23,20 +22,6 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'calendar', label: 'Calendar',     icon: '📅' },
   { id: 'courses',  label: 'Courses',      icon: '📚' },
 ];
-
-function SyncBadge({ lastUpdated }: { lastUpdated: string }) {
-  const [info, setInfo] = useState(formatSyncAge(lastUpdated));
-  useEffect(() => {
-    const id = setInterval(() => setInfo(formatSyncAge(lastUpdated)), 30000);
-    return () => clearInterval(id);
-  }, [lastUpdated]);
-  return (
-    <div className={`sync-badge ${info.status}`}>
-      <span className="sync-dot" />
-      Sync {info.text}
-    </div>
-  );
-}
 
 import { supabase } from '@/lib/supabaseClient';
 
@@ -95,7 +80,7 @@ export default function App() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', gap: 16 }}>
         <div style={{ width: 36, height: 36, border: '3px solid #cbd5e1', borderTopColor: '#4f46e5', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <p style={{ color: '#64748b', fontSize: 14, fontWeight: 600 }}>Loading IITD Timetable Data…</p>
+        <p style={{ color: '#64748b', fontSize: 14, fontWeight: 600 }}>Loading IITD Academic Aggregator…</p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -118,79 +103,52 @@ export default function App() {
       {showModal && <GroupSelectorModal onSelect={handleGroupSelect} />}
       <GlobalSearch data={data} isOpen={showSearch} onClose={() => setShowSearch(false)} />
 
-      {/* ── PDF-Style Header Banner ── */}
-      <header className="header-banner">
+      {/* ── Compact Header Banner ── */}
+      <header className="header-banner" style={{ padding: '12px 16px' }}>
         <div className="header-banner-inner">
           <div>
-            <div className="header-institution">Indian Institute of Technology Delhi</div>
-            <h1 className="header-title-text">Civil Engineering B.Tech — Schedule (Semester 1, 2026–2027)</h1>
+            <div className="header-institution" style={{ fontSize: 10, letterSpacing: 0.8 }}>INDIAN INSTITUTE OF TECHNOLOGY DELHI</div>
+            <h1 className="header-title-text" style={{ fontSize: 16, margin: 0 }}>Civil Engineering B.Tech</h1>
           </div>
-          <div className="header-badges">
-            {/* Search Bar Trigger */}
+          <div className="header-badges" style={{ gap: 8 }}>
             <button
               onClick={() => setShowSearch(true)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '6px 14px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#475569',
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px',
+                background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 8,
+                fontSize: 12, fontWeight: 700, color: '#475569', cursor: 'pointer'
               }}
             >
-              <span>🔍 Search slides...</span>
-              <kbd style={{ background: '#f1f5f9', padding: '2px 5px', borderRadius: 4, fontSize: 10, border: '1px solid #cbd5e1' }}>Ctrl K</kbd>
+              <span>🔍 Search</span>
             </button>
-
-            <SyncBadge lastUpdated={data.last_updated} />
-            <button className="group-pill" onClick={() => setShowModal(true)}>
+            <button className="group-pill" onClick={() => setShowModal(true)} style={{ padding: '5px 10px', fontSize: 12 }}>
               🔬 {groupLabel} ✎
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── Temporal Progress & Milestone Countdown Bar ── */}
-      <SemesterTimelineHeader timeline={data.semester_timeline} />
-
-      {/* ── Navy Navigation Bar ── */}
-      <nav className="nav-bar">
+      {/* ── Sticky Navy Navigation Bar ── */}
+      <nav className="nav-bar" style={{ position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
         <div className="nav-bar-inner">
-          <div className="tab-group">
+          <div className="tab-group" style={{ width: '100%', justifyContent: 'space-around' }}>
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
+                style={{ padding: '10px 12px', flex: '1 1 auto', justifyContent: 'center' }}
               >
                 <span className="tab-icon">{tab.icon}</span>
-                {tab.label}
+                <span>{tab.label}</span>
               </button>
             ))}
-          </div>
-
-          {/* Timetable Legend Pills */}
-          <div className="nav-legend">
-            <span className="legend-pill lecture">
-              <span className="legend-dot lecture" />
-              Lecture
-            </span>
-            <span className="legend-pill lab">
-              <span className="legend-dot lab" />
-              Lab
-            </span>
           </div>
         </div>
       </nav>
 
       {/* ── Main Tab Content ── */}
-      <main className="tab-content">
+      <main className="tab-content" style={{ padding: '16px 12px' }}>
         {activeTab === 'today' && labGroup && (
           <TodayTab data={data} labGroup={labGroup} overrides={overrides} />
         )}
@@ -205,9 +163,8 @@ export default function App() {
         )}
       </main>
 
-      {/* ── PDF-Style Footer ── */}
       <footer className="app-footer">
-        IIT Delhi Civil Engineering Timetable • Semester 1, 2026–2027
+        IIT Delhi Civil Engineering • Semester 1 (2026–2027)
       </footer>
     </div>
   );
