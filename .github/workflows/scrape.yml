@@ -22,20 +22,26 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install playwright python-dotenv
+          pip install playwright python-dotenv google-genai
           playwright install --with-deps chromium
 
-      - name: Run Scraper
+      - name: Run Moodle Scraper & Webmail Scraper
         env:
           MOODLE_SESSION: ${{ secrets.MOODLE_SESSION }}
           MOODLENEW_SESSION: ${{ secrets.MOODLE_SESSION }}
           MOODLENEW_SESSION_VAL: ${{ secrets.MOODLENEW_SESSION }}
+          KERBEROS_ID: ${{ secrets.KERBEROS_ID }}
+          KERBEROS_PASS: ${{ secrets.KERBEROS_PASS }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          IMAP_SERVER: "imap.iitd.ac.in"
+          IMAP_PORT: "993"
         run: |
           python scraper/scrape.py
+          python scraper/webmail_scraper.py
 
-      - name: Commit and push updated data.json
+      - name: Commit and push updated data.json and overrides.json
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add public/data.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "auto: update moodle data [skip ci]" && git push)
+          git add public/data.json public/overrides.json bot/overrides.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "auto: update moodle and webmail data [skip ci]" && git push)
