@@ -32,14 +32,26 @@ export interface SemesterWeekInfo {
   endDate: string;
 }
 
-export function getSemesterWeekInfo(startDateStr = '2026-08-01', totalWeeks = 16): SemesterWeekInfo {
+export function getSemesterWeekInfo(startDateStr = '2026-07-23', totalWeeks = 17): SemesterWeekInfo {
   const start = new Date(startDateStr);
   const now = new Date();
-  const diffTime = Math.max(0, now.getTime() - start.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  // Anchor to the Monday of the semester start week
+  // getDay(): 0=Sun, 1=Mon ... 6=Sat
+  const startDay = start.getDay(); // e.g. Thu = 4
+  const daysToMonday = startDay === 0 ? -6 : 1 - startDay; // go back to Monday
+  const weekAnchor = new Date(start);
+  weekAnchor.setDate(start.getDate() + daysToMonday); // Monday of the week containing start date
+  weekAnchor.setHours(0, 0, 0, 0);
+
+  const nowMidnight = new Date(now);
+  nowMidnight.setHours(0, 0, 0, 0);
+
+  const diffMs = Math.max(0, nowMidnight.getTime() - weekAnchor.getTime());
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const currentWeek = Math.min(totalWeeks, Math.floor(diffDays / 7) + 1);
   const progressPercent = Math.min(100, Math.round((currentWeek / totalWeeks) * 100));
-  const end = new Date(start.getTime() + totalWeeks * 7 * 24 * 60 * 60 * 1000);
+  const end = new Date(weekAnchor.getTime() + totalWeeks * 7 * 24 * 60 * 60 * 1000);
 
   return {
     currentWeek,
