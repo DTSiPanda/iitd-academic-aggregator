@@ -409,6 +409,19 @@ async def remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _is_owner(update):
+        return
+    import json as _json
+    overrides = {"cancellations": [], "deadline_overrides": [], "exams": [], "notes": [], "flagged": [], "lab_done": []}
+    with open(OVERRIDES_PATH, "w", encoding="utf-8") as f:
+        _json.dump(overrides, f, indent=2)
+    with open(PUBLIC_OVERRIDES_PATH, "w", encoding="utf-8") as f:
+        _json.dump(overrides, f, indent=2)
+    _push_to_supabase(overrides)
+    await update.message.reply_text("🗑️ All bot additions & overrides cleared successfully!")
+
+
 async def remove_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != OWNER_ID:
         return
@@ -516,6 +529,7 @@ def main():
     app.add_handler(CommandHandler("notes", notes_command))
     app.add_handler(CommandHandler("list", list_command))
     app.add_handler(CommandHandler("remove", remove_command))
+    app.add_handler(CommandHandler("clear", clear_command))
     app.add_handler(CommandHandler("sync", sync_command))
     app.add_handler(CommandHandler("webmail", webmail_command))
     app.add_handler(CommandHandler("mail", webmail_command))
