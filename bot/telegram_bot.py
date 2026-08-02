@@ -221,6 +221,26 @@ async def notes_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
+async def webmail_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _is_owner(update):
+        return
+    await update.message.reply_text("📧 Checking IITD Webmail for recent instructor emails...")
+    try:
+        import sys
+        sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scraper"))
+        from webmail_scraper import fetch_recent_instructor_emails, process_emails_with_gemini
+        
+        mails = fetch_recent_instructor_emails()
+        if not mails:
+            await update.message.reply_text("📧 Checked Webmail: No new relevant instructor emails found.")
+        else:
+            await update.message.reply_text(f"📧 Found {len(mails)} instructor email(s). Processing with Gemini...")
+            process_emails_with_gemini(mails)
+            await update.message.reply_text("✅ Webmail sync complete! Overrides updated.")
+    except Exception as e:
+        await update.message.reply_text(f"⚠️ Webmail sync error: {str(e)}")
+
+
 # ── Natural Language Message Handler ─────────────────────────────────────────
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -254,6 +274,8 @@ def main():
     app.add_handler(CommandHandler("due", due_command))
     app.add_handler(CommandHandler("new", new_command))
     app.add_handler(CommandHandler("notes", notes_command))
+    app.add_handler(CommandHandler("webmail", webmail_command))
+    app.add_handler(CommandHandler("mail", webmail_command))
     app.add_handler(CallbackQueryHandler(group_callback, pattern="^group_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
