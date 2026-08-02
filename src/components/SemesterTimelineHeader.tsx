@@ -1,14 +1,14 @@
 'use client';
 
-import { SemesterTimeline } from '@/types/schema';
+import { SemesterTimeline, Overrides } from '@/types/schema';
+import { COURSE_COLORS } from '@/lib/scheduleData';
 
 interface Props {
   timeline?: SemesterTimeline;
+  overrides?: Overrides;
 }
 
-export default function SemesterTimelineHeader({ timeline }: Props) {
-  if (!timeline || !timeline.start_date || !timeline.end_date) return null;
-
+export default function SemesterTimelineHeader({ timeline, overrides }: Props) {
   const now = new Date();
   const start = new Date('2026-07-23'); // Lock to official IITD start date
 
@@ -26,19 +26,41 @@ export default function SemesterTimelineHeader({ timeline }: Props) {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const currentWeek = Math.min(17, Math.floor(diffDays / 7) + 1);
 
-  // Find next milestone / exam
-  const milestones = timeline.milestones || [
-    { name: 'Mid-Semester Exams (Minor)', date: '2026-09-12', type: 'exam' },
-    { name: 'End-Semester Exams (Major)', date: '2026-11-19', type: 'exam' },
-  ];
+  // Extract upcoming Quizzes, Tests & Exams logged via Telegram bot / overrides
+  const upcomingQuizzesAndExams: { title: string; course: string; date: string; type: 'quiz' | 'exam' }[] = [];
 
-  const nextMilestone = milestones
-    .map(m => ({ ...m, msDate: new Date(m.date) }))
-    .filter(m => m.msDate.getTime() >= nowMidnight.getTime())
-    .sort((a, b) => a.msDate.getTime() - b.msDate.getTime())[0];
+  if (overrides) {
+    // 1. Quizzes and lab deadline overrides
+    overrides.deadline_overrides.forEach(d => {
+      if (new Date(d.due_date).getTime() >= nowMidnight.getTime()) {
+        upcomingQuizzesAndExams.push({
+          title: d.item,
+          course: d.course,
+          date: d.due_date,
+          type: 'quiz'
+        });
+      }
+    });
 
-  const daysToMilestone = nextMilestone
-    ? Math.ceil((nextMilestone.msDate.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24))
+    // 2. Custom exams logged via bot
+    overrides.exams.forEach(e => {
+      if (new Date(e.end_date).getTime() >= nowMidnight.getTime()) {
+        upcomingQuizzesAndExams.push({
+          title: e.name,
+          course: e.courses?.[0] || 'IITD',
+          date: e.start_date,
+          type: 'exam'
+        });
+      }
+    });
+  }
+
+  // Sort upcoming by earliest date
+  upcomingQuizzesAndExams.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const nextQuiz = upcomingQuizzesAndExams[0] || null;
+  const daysLeft = nextQuiz
+    ? Math.ceil((new Date(nextQuiz.date).getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
   return (
@@ -61,19 +83,32 @@ export default function SemesterTimelineHeader({ timeline }: Props) {
           <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>Sem 1 (2026-27)</span>
         </div>
 
-        {/* Right: Milestone / Quiz / Exam Countdown Ticker */}
-        {nextMilestone && daysToMilestone !== null && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {/* Right: Upcoming Quiz / Bot Logged Event Ticker */}
+        {nextQuiz && daysLeft !== null ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#f8fafc' }}>
+              📝 NEXT QUIZ/TEST:
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 900, padding: '2px 6px', borderRadius: 4,
+              background: COURSE_COLORS[nextQuiz.course] || '#6366f1', color: '#fff'
+            }}>
+              {nextQuiz.course}
+            </span>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0' }}>
-              📝 {nextMilestone.name}:
+              {nextQuiz.title}
             </span>
             <span style={{
               fontSize: 11, fontWeight: 900, padding: '2px 8px', borderRadius: 6,
-              background: daysToMilestone <= 7 ? '#ef4444' : daysToMilestone <= 21 ? '#f59e0b' : '#10b981',
+              background: daysLeft <= 3 ? '#ef4444' : daysLeft <= 7 ? '#f59e0b' : '#10b981',
               color: '#fff'
             }}>
-              {daysToMilestone === 0 ? 'TODAY' : `In ${daysToMilestone}d (${nextMilestone.date})`}
+              {daysLeft === 0 ? 'TODAY' : `In ${daysLeft}d`}
             </span>
+          </div>
+        ) : (
+          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>⚡ Log quizzes & tests via Telegram Bot</span>
           </div>
         )}
       </div>

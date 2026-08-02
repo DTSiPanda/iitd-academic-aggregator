@@ -130,7 +130,7 @@ export default function App() {
       </header>
 
       {/* ── Top Milestone & Exam Countdown Bar ── */}
-      <SemesterTimelineHeader timeline={data.semester_timeline} />
+      <SemesterTimelineHeader timeline={data.semester_timeline} overrides={overrides} />
 
       {/* ── Sticky Navy Navigation Bar ── */}
       <nav className="nav-bar" style={{ position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>

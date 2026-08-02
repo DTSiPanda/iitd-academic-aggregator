@@ -20,7 +20,6 @@ function getFileIcon(res: Resource): string {
 }
 
 export default function CoursesTab({ courses, overrides }: Props) {
-  const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'lecture' | 'lab'>('all');
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
 
@@ -28,22 +27,15 @@ export default function CoursesTab({ courses, overrides }: Props) {
     setExpandedCourse(prev => prev === id ? null : id);
   };
 
-  // Filter courses based on search & tab selection
+  // Filter courses based on tab selection
   const filteredCourses = useMemo(() => {
     return courses.filter(course => {
       const isLab = course.id.startsWith('CVP') || (course.id === 'MEP1000' && course.name.toLowerCase().includes('lab'));
       if (filterType === 'lecture' && isLab) return false;
       if (filterType === 'lab' && !isLab) return false;
-
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
-      return (
-        course.id.toLowerCase().includes(q) ||
-        course.name.toLowerCase().includes(q) ||
-        (course.instructor && course.instructor.toLowerCase().includes(q))
-      );
+      return true;
     });
-  }, [courses, search, filterType]);
+  }, [courses, filterType]);
 
   const totalFiles = courses.reduce((acc, c) => acc + c.new_items.length, 0);
   const totalAssignments = courses.reduce((acc, c) => acc + c.assignments.length, 0);
@@ -64,22 +56,6 @@ export default function CoursesTab({ courses, overrides }: Props) {
             <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
               {courses.length} courses enrolled • {totalFiles} resources • {totalAssignments} assignments
             </div>
-          </div>
-
-          {/* Search Box */}
-          <div style={{ position: 'relative', minWidth: 220, flex: '1 1 220px' }}>
-            <input
-              type="text"
-              placeholder="🔍 Search course, professor..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{
-                width: '100%', padding: '8px 12px 8px 34px', borderRadius: 10,
-                border: '1px solid #cbd5e1', fontSize: 13, background: '#f8fafc',
-                outline: 'none', color: '#0f172a', boxSizing: 'border-box'
-              }}
-            />
-            <span style={{ position: 'absolute', left: 10, top: 8, fontSize: 13, color: '#94a3b8' }}>🔍</span>
           </div>
         </div>
 
@@ -364,7 +340,7 @@ export default function CoursesTab({ courses, overrides }: Props) {
                 {/* ── Block Footer: Quick Links ── */}
                 <div style={{
                   padding: '10px 16px', background: '#f8fafc', borderTop: '1px solid #f1f5f9',
-                  display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between'
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                 }}>
                   <a
                     href={course.url}
@@ -372,37 +348,12 @@ export default function CoursesTab({ courses, overrides }: Props) {
                     rel="noopener noreferrer"
                     style={{
                       fontSize: 11, fontWeight: 800, color: color, background: color + '15',
-                      padding: '5px 10px', borderRadius: 8, textDecoration: 'none',
+                      padding: '5px 12px', borderRadius: 8, textDecoration: 'none',
                       display: 'inline-flex', alignItems: 'center', gap: 4
                     }}
                   >
-                    🌐 Open Moodle →
+                    🌐 Open Moodle Course →
                   </a>
-
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <a
-                      href="#"
-                      onClick={e => { e.preventDefault(); alert(`WhatsApp Group link for ${course.id} can be set in schedules.json`); }}
-                      style={{
-                        fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#dcfce7',
-                        padding: '5px 8px', borderRadius: 8, textDecoration: 'none'
-                      }}
-                      title="WhatsApp Group"
-                    >
-                      💬 Group
-                    </a>
-                    <a
-                      href="#"
-                      onClick={e => { e.preventDefault(); alert(`PYQ Drive link for ${course.id} can be set in schedules.json`); }}
-                      style={{
-                        fontSize: 11, fontWeight: 700, color: '#0284c7', background: '#e0f2fe',
-                        padding: '5px 8px', borderRadius: 8, textDecoration: 'none'
-                      }}
-                      title="PYQs Drive Folder"
-                    >
-                      📁 PYQs
-                    </a>
-                  </div>
                 </div>
 
               </div>

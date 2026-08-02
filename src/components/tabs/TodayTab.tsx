@@ -88,6 +88,73 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
       {/* ── Exam Banner ── */}
       <ExamBanner exams={overrides.exams} />
 
+      {/* ── Quiz & Test Alert Banner (From Telegram Bot & Overrides) ── */}
+      {(() => {
+        const upcomingQuizzes = overrides.deadline_overrides
+          .filter(d => new Date(d.due_date).getTime() >= new Date().setHours(0,0,0,0))
+          .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+
+        if (upcomingQuizzes.length === 0) return null;
+
+        const nextQuiz = upcomingQuizzes[0];
+        const days = Math.ceil((new Date(nextQuiz.due_date).getTime() - new Date().getTime()) / 86400000);
+        const courseColor = COURSE_COLORS[nextQuiz.course] || '#ef4444';
+
+        return (
+          <div style={{
+            background: 'linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%)',
+            border: '2px solid #ef4444',
+            borderRadius: 16, padding: '14px 16px', marginBottom: 16,
+            boxShadow: '0 4px 14px rgba(239, 68, 68, 0.15)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 900, color: '#991b1b', textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>⚡ UPCOMING QUIZ / TEST ALERT</span>
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#7f1d1d', marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, padding: '2px 8px', borderRadius: 6, background: courseColor, color: '#fff' }}>
+                    {nextQuiz.course}
+                  </span>
+                  <span>{nextQuiz.item}</span>
+                </div>
+                {nextQuiz.note && (
+                  <div style={{ fontSize: 11, color: '#991b1b', marginTop: 2 }}>
+                    💬 {nextQuiz.note}
+                  </div>
+                )}
+              </div>
+              <div style={{
+                background: days <= 1 ? '#dc2626' : days <= 3 ? '#ea580c' : '#ef4444',
+                color: '#fff', borderRadius: 20, padding: '8px 14px',
+                fontSize: 13, fontWeight: 900, flexShrink: 0, textAlign: 'center'
+              }}>
+                {days > 0 ? `In ${days}d` : 'TODAY'}
+              </div>
+            </div>
+
+            {upcomingQuizzes.length > 1 && (
+              <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #fca5a5', display: 'flex', gap: 8, overflowX: 'auto' }}>
+                {upcomingQuizzes.slice(1).map((q, idx) => {
+                  const qDays = Math.ceil((new Date(q.due_date).getTime() - new Date().getTime()) / 86400000);
+                  const qColor = COURSE_COLORS[q.course] || '#dc2626';
+                  return (
+                    <div key={idx} style={{
+                      background: '#ffffffb3', padding: '4px 8px', borderRadius: 6,
+                      fontSize: 11, color: '#7f1d1d', fontWeight: 700, flex: '0 0 auto',
+                      display: 'flex', alignItems: 'center', gap: 6
+                    }}>
+                      <span style={{ fontSize: 9, fontWeight: 900, padding: '1px 5px', borderRadius: 4, background: qColor, color: '#fff' }}>{q.course}</span>
+                      <span>{q.item}: <strong>In {qDays}d</strong></span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* ── 1. TODAY'S ACTION PLAN ── */}
       <div style={{
         background: '#fff', border: '2px solid #3b82f6', borderRadius: 16, padding: '16px', marginBottom: 20,

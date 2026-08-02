@@ -81,6 +81,38 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
     });
   });
 
+  // 4. Bot notes containing dates or logged dates
+  overrides.notes.forEach(n => {
+    const dateMatch = n.text.match(/\b(202[6-7]-\d{2}-\d{2})\b/) || n.text.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\b/i);
+    let targetDate: Date | null = null;
+
+    if (dateMatch) {
+      if (dateMatch[1] && dateMatch[1].includes('-')) {
+        targetDate = new Date(dateMatch[1]);
+      } else if (dateMatch[1] && dateMatch[2]) {
+        const monthIdx = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(dateMatch[1].toLowerCase());
+        if (monthIdx !== -1) {
+          targetDate = new Date(2026, monthIdx, parseInt(dateMatch[2], 10));
+        }
+      }
+    } else if (n.added_at) {
+      targetDate = new Date(n.added_at);
+    }
+
+    if (targetDate && !isNaN(targetDate.getTime())) {
+      const key = `${targetDate.getFullYear()}-${targetDate.getMonth()}-${targetDate.getDate()}`;
+      if (!eventsByDate[key]) eventsByDate[key] = [];
+      const priorityEmoji = n.priority === 'high' ? '🔴' : n.priority === 'medium' ? '🟡' : '🔵';
+      eventsByDate[key].push({
+        title: `📌 ${priorityEmoji} ${n.text}`,
+        courseId: n.course,
+        type: 'bot',
+        url: '#',
+        due_date: targetDate.toISOString()
+      });
+    }
+  });
+
   const cells: (number | null)[] = [
     ...Array(firstDay).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
