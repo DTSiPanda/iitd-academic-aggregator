@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
 import { getUrgencyLevel, formatTimeUntil, getSemesterWeekInfo } from '@/lib/fetchData';
+import { COURSE_COLORS } from '@/lib/scheduleData';
 
 interface Props {
   data: AggregatorData;
@@ -63,7 +64,8 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
     const dateObj = new Date(ex.start_date);
     const key = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
     if (!eventsByDate[key]) eventsByDate[key] = [];
-    eventsByDate[key].push({ title: `📝 EXAM: ${ex.name}`, courseId: 'EXAM', type: 'exam', url: '#', due_date: ex.start_date });
+    const courseCode = (ex.courses && ex.courses[0]) || 'EXAM';
+    eventsByDate[key].push({ title: `📝 EXAM: ${ex.name}`, courseId: courseCode, type: 'exam', url: '#', due_date: ex.start_date });
   });
 
   const cells: (number | null)[] = [
@@ -168,12 +170,15 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
                 <span style={{ fontSize: 12, fontWeight: isS || isT || hasExam ? 900 : 600 }}>{d}</span>
                 {evs.length > 0 && (
                   <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
-                    {evs.slice(0, 3).map((e, ei) => (
-                      <span key={ei} style={{
-                        width: 4, height: 4, borderRadius: '50%',
-                        background: isS ? '#fff' : e.type === 'exam' ? '#f59e0b' : '#ef4444'
-                      }} />
-                    ))}
+                    {evs.slice(0, 3).map((e, ei) => {
+                      const color = COURSE_COLORS[e.courseId] || (e.type === 'exam' ? '#f59e0b' : '#ef4444');
+                      return (
+                        <span key={ei} style={{
+                          width: 5, height: 5, borderRadius: '50%',
+                          background: isS ? '#fff' : color
+                        }} />
+                      );
+                    })}
                   </div>
                 )}
               </button>
@@ -182,25 +187,44 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
         </div>
       </div>
 
-      {/* Selected Day Events Detail */}
+      {/* Selected Day Events Detail with Clear Course Code Badges */}
       {selected && (
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px' }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>
+        <div style={{ background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px' }}>
+          <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>
             📅 {selected.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
           {selectedEvents.length === 0 ? (
-            <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>No events or deadlines on this date</div>
+            <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '12px 0' }}>No deadlines or exams on this date 🎉</div>
           ) : (
-            selectedEvents.map((ev, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < selectedEvents.length - 1 ? '1px solid #e2e8f0' : 'none' }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: ev.type === 'exam' ? '#b45309' : '#0f172a' }}>
-                  {ev.title} {ev.courseId !== 'EXAM' ? `(${ev.courseId})` : ''}
-                </span>
-                <span style={{ fontSize: 11, color: ev.type === 'exam' ? '#d97706' : '#ef4444', fontWeight: 800 }}>
-                  {formatTimeUntil(ev.due_date)}
-                </span>
-              </div>
-            ))
+            selectedEvents.map((ev, i) => {
+              const color = COURSE_COLORS[ev.courseId] || (ev.type === 'exam' ? '#d97706' : '#6366f1');
+              return (
+                <div key={i} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '10px 12px', background: '#f8fafc', borderRadius: 10, marginBottom: 8,
+                  borderLeft: `4px solid ${color}`
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {/* Course Code Badge */}
+                    <span style={{
+                      fontSize: 10, fontWeight: 900, padding: '3px 8px', borderRadius: 6,
+                      background: color + '15', color: color, textTransform: 'uppercase', flexShrink: 0
+                    }}>
+                      {ev.courseId}
+                    </span>
+
+                    {/* Title */}
+                    <span style={{ fontSize: 13, fontWeight: 700, color: ev.type === 'exam' ? '#92400e' : '#0f172a' }}>
+                      {ev.title}
+                    </span>
+                  </div>
+
+                  <span style={{ fontSize: 11, color: ev.type === 'exam' ? '#b45309' : '#ef4444', fontWeight: 900, flexShrink: 0 }}>
+                    {formatTimeUntil(ev.due_date)}
+                  </span>
+                </div>
+              );
+            })
           )}
         </div>
       )}
