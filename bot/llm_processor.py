@@ -34,16 +34,17 @@ TOOLS = [
     },
     {
         "name": "override_deadline",
-        "description": "Override or set a deadline for an assignment, quiz, or lab report.",
+        "description": "Override or set a deadline for an assignment, quiz, or lab report. Supports groupwise (lab group schedule) or wholeclass (entire class).",
         "parameters": {
             "type": "object",
             "properties": {
-                "course": {"type": "string"},
+                "course": {"type": "string", "description": "Course code e.g. CVP2401 or CVL2702"},
                 "item": {"type": "string", "description": "Name of the assignment, quiz, or lab report"},
-                "due_date": {"type": "string", "description": "ISO date-time e.g. 2026-08-08T17:00:00"},
+                "due_date": {"type": "string", "description": "ISO date-time e.g. 2026-08-08T17:00:00 or YYYY-MM-DD. Optional if groupwise lab auto-calculates."},
+                "scope": {"type": "string", "enum": ["groupwise", "wholeclass"], "description": "groupwise = scheduled per lab group slot, wholeclass = for entire class"},
                 "note": {"type": "string"}
             },
-            "required": ["course", "item", "due_date"]
+            "required": ["course", "item"]
         }
     },
     {

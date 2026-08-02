@@ -88,7 +88,18 @@ export function isClassCancelled(
   course: string,
   day: string
 ): boolean {
-  return cancellations.some(c => c.course === course && c.day === day);
+  if (!cancellations || cancellations.length === 0) return false;
+  const courseClean = course.trim().toLowerCase();
+  const dayClean = day.trim().toLowerCase();
+
+  return cancellations.some(c => {
+    const cCourse = (c.course || '').trim().toLowerCase();
+    const cDay = (c.day || '').trim().toLowerCase();
+
+    const matchCourse = cCourse === courseClean || cCourse.includes(courseClean) || courseClean.includes(cCourse);
+    const matchDay = cDay === dayClean;
+    return matchCourse && matchDay;
+  });
 }
 
 // Get all notes for a course sorted by priority

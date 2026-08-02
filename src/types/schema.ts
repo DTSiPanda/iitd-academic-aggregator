@@ -88,6 +88,8 @@ export interface DeadlineOverride {
   course: string;
   item: string;
   due_date: string;
+  scope?: 'groupwise' | 'wholeclass';
+  group?: string;
   note?: string;
   added_at: string;
 }

@@ -17,9 +17,9 @@ interface Props {
 
 export default function TodayTab({ data, labGroup, overrides }: Props) {
   const now = new Date();
-  const todayName = DAYS[now.getDay() - 1] || (now.getDay() === 0 ? 'Sunday' : 'Monday');
-  const tomorrowIdx = (now.getDay() % 7);
-  const tomorrowName = DAYS[tomorrowIdx === 0 ? 6 : tomorrowIdx - 1] || 'Monday';
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const todayName = DAY_NAMES[now.getDay()];
+  const tomorrowName = DAY_NAMES[(now.getDay() + 1) % 7];
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   // Official IITD Sem 1 2026-27 start — locked, do NOT use data.semester_timeline
@@ -43,20 +43,25 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
   const todaySlots = getDaySlots(todayName);
   const tomorrowSlots = getDaySlots(tomorrowName);
 
-  // Deadlines filtering
+  // Deadlines filtering (supporting groupwise vs wholeclass)
   const weekEnd = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
   const tomorrowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59).toISOString();
+
+  const activeGroupOverrides = overrides.deadline_overrides.filter(d => {
+    if (!d.scope || d.scope === 'wholeclass' || d.group === 'all') return true;
+    return d.group === labGroup;
+  });
 
   const allDeadlines = [
     ...data.courses.flatMap(c =>
       c.assignments
         .filter(a => a.due_date && a.due_date <= weekEnd)
-        .map(a => ({ title: a.title, due_date: a.due_date!, course: c.id, url: a.url, source: 'moodle' as const }))
+        .map(a => ({ title: a.title, due_date: a.due_date!, course: c.id, url: a.url, source: 'moodle' as const, scope: 'wholeclass' }))
     ),
-    ...overrides.deadline_overrides
+    ...activeGroupOverrides
       .filter(d => d.due_date <= weekEnd)
-      .map(d => ({ title: d.item, due_date: d.due_date, course: d.course, url: '#', source: 'bot' as const })),
+      .map(d => ({ title: d.item, due_date: d.due_date, course: d.course, url: '#', source: 'bot' as const, scope: d.scope || 'groupwise' })),
   ].sort((a, b) => a.due_date.localeCompare(b.due_date));
 
   const todayDeadlines = allDeadlines.filter(d => d.due_date <= todayEnd);
@@ -250,11 +255,14 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
               const color = COURSE_COLORS[slot.code] ?? '#64748b';
               return (
                 <div key={i} style={{
-                  background: '#f8fafc', borderLeft: `4px solid ${color}`, borderRadius: 10, padding: '10px 12px', marginBottom: 6,
+                  background: slot.cancelled ? '#fef2f2' : '#f8fafc',
+                  borderLeft: `4px solid ${slot.cancelled ? '#ef4444' : color}`, borderRadius: 10, padding: '10px 12px', marginBottom: 6,
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
                   <div>
-                    <span style={{ fontSize: 13, fontWeight: 800, color }}>{slot.code} — {slot.course}</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: slot.cancelled ? '#ef4444' : color, textDecoration: slot.cancelled ? 'line-through' : 'none' }}>
+                      {slot.cancelled ? '❌ ' : ''}{slot.code} — {slot.course}
+                    </span>
                     <div style={{ fontSize: 11, color: '#64748b' }}>📍 {slot.venue}</div>
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</span>

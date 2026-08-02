@@ -126,17 +126,38 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
         return f"❌ Noted — {args['course']} on {args['day']} marked as cancelled."
 
     elif tool_name == "override_deadline":
-        due_date = _fix_year(args["due_date"])
+        due_date = _fix_year(args.get("due_date"))
+        scope = args.get("scope", "wholeclass")
+        course = args["course"]
+
+        # If scope is groupwise OR course is a lab without explicit due_date
+        if scope == "groupwise" or (course.startswith("CVP") and not due_date):
+            lab_info = LAB_GROUP_SCHEDULE.get(user_group, {}).get(course)
+            if lab_info:
+                next_lab = _next_weekday_date(lab_info["day"])
+                h, m = map(int, lab_info["time"].split(":"))
+                due_dt = next_lab.replace(hour=h, minute=m, second=0)
+                due_date = due_dt.strftime("%Y-%m-%dT%H:%M:00")
+                scope_label = f"Groupwise [{user_group.upper()} slot: {lab_info['day']} {lab_info['time']}]"
+            else:
+                due_date = due_date or datetime.now().strftime("%Y-%m-%dT17:00:00")
+                scope_label = f"Groupwise [{user_group.upper()}]"
+        else:
+            due_date = due_date or datetime.now().strftime("%Y-%m-%dT17:00:00")
+            scope_label = "Whole Class"
+
         entry = {
-            "course": args["course"],
+            "course": course,
             "item": args["item"],
             "due_date": due_date,
+            "scope": scope,
+            "group": user_group if scope == "groupwise" else "all",
             "note": args.get("note", ""),
             "added_at": datetime.now().isoformat()
         }
         data["deadline_overrides"].append(entry)
         _save(data)
-        return f"📅 Got it — {args['item']} ({args['course']}) deadline set to {due_date}."
+        return f"📅 Got it — {args['item']} ({course}) set to {due_date} ({scope_label})."
 
     elif tool_name == "add_exam":
         s_date = _fix_year(args["start_date"])

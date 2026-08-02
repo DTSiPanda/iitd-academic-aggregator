@@ -55,4 +55,8 @@ OFFICIAL ACADEMIC CALENDAR — Semester 1, 2026-27 (IITD):
 - End-Semester Exams (Major): 19 Nov 2026 (Thu) → 25 Nov 2026 (Wed)
 
 EXAM DATES RULE: When user says "minor" without specifying dates, use 12 Sep 2026 as start. When user says "major" or "endsem", use 19 Nov 2026 as start.
+
+DEADLINE SCOPE RULE:
+- Use scope="groupwise" for lab assignments, lab reports, or group-specific tasks (CVP2401, CVP2502, CVP2601, CVP2702, MEP1000 lab). It schedules according to that specific group's lab day and time.
+- Use scope="wholeclass" for lecture assignments, quizzes, minors, majors, and class-wide tasks (CVL2702, CVL2502, CVL2601, etc.).
 """
