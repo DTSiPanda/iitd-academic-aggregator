@@ -139,6 +139,8 @@ class MoodleScraper:
         print(f"  [{self.label}] Scraping: {course_name}")
         result = {"resources": [], "assignments": [], "page_title": ""}
 
+        course_code = detect_course_code(course_name) or "general"
+
         try:
             await page.goto(course_url, wait_until="domcontentloaded", timeout=30000)
 
@@ -151,6 +153,7 @@ class MoodleScraper:
                         if resolved and "course image" not in resolved.lower():
                             result["page_title"] = resolved
                             course_name = resolved
+                            course_code = detect_course_code(course_name) or "general"
                             print(f"  [{self.label}]   name from page: {course_name}")
                             break
 
@@ -183,7 +186,7 @@ class MoodleScraper:
                     full_url = href if href.startswith("http") else self.base_url + href
                     
                     # Download file using Playwright's authenticated request session
-                    local_file_url = await self._download_resource_file(page, result["course_id"], title, full_url)
+                    local_file_url = await self._download_resource_file(page, course_code, title, full_url)
 
                     result["resources"].append({
                         "title": title,
@@ -191,7 +194,8 @@ class MoodleScraper:
                         "type": "file",
                         "uploaded_at": None,  # will attempt to fill below
                     })
-                except Exception:
+                except Exception as ex:
+                    print(f"  [{self.label}] ⚠️ Resource error: {ex}")
                     continue
 
             # Also pick up URLs and pages (folders, external links)
