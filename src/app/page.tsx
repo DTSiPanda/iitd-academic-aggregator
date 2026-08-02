@@ -201,7 +201,7 @@ export default function App() {
           <CoursesTab courses={data.courses} overrides={overrides} />
         )}
         {activeTab === 'calendar' && labGroup && (
-          <CalendarTab data={data} labGroup={labGroup} />
+          <CalendarTab data={data} labGroup={labGroup} overrides={overrides} />
         )}
       </main>
 

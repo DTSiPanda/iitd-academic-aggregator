@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { AggregatorData, LabGroup } from '@/types/schema';
+import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
 import { getUrgencyLevel, formatTimeUntil, getSemesterWeekInfo } from '@/lib/fetchData';
 
 interface Props {
   data: AggregatorData;
   labGroup: LabGroup;
+  overrides: Overrides;
 }
 
 const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-export default function CalendarTab({ data, labGroup }: Props) {
+export default function CalendarTab({ data, labGroup, overrides }: Props) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState<Date | null>(today);
@@ -35,16 +36,34 @@ export default function CalendarTab({ data, labGroup }: Props) {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Map deadlines to dates
-  const deadlinesByDate: Record<string, { title: string; courseId: string; url: string; due_date: string | null }[]> = {};
+  // Map Moodle deadlines + Bot overrides + Exams to dates
+  const eventsByDate: Record<string, { title: string; courseId: string; type: 'assignment' | 'exam' | 'bot'; url: string; due_date: string }[]> = {};
+
+  // 1. Moodle assignments
   data.courses.forEach(c => {
     c.assignments.forEach(a => {
       if (!a.due_date) return;
       const d = new Date(a.due_date);
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if (!deadlinesByDate[key]) deadlinesByDate[key] = [];
-      deadlinesByDate[key].push({ title: a.title, courseId: c.id, url: a.url, due_date: a.due_date });
+      if (!eventsByDate[key]) eventsByDate[key] = [];
+      eventsByDate[key].push({ title: a.title, courseId: c.id, type: 'assignment', url: a.url, due_date: a.due_date });
     });
+  });
+
+  // 2. Bot deadline overrides
+  overrides.deadline_overrides.forEach(d => {
+    const dateObj = new Date(d.due_date);
+    const key = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
+    if (!eventsByDate[key]) eventsByDate[key] = [];
+    eventsByDate[key].push({ title: d.item, courseId: d.course, type: 'bot', url: '#', due_date: d.due_date });
+  });
+
+  // 3. Bot exam entries
+  overrides.exams.forEach(ex => {
+    const dateObj = new Date(ex.start_date);
+    const key = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
+    if (!eventsByDate[key]) eventsByDate[key] = [];
+    eventsByDate[key].push({ title: `📝 EXAM: ${ex.name}`, courseId: 'EXAM', type: 'exam', url: '#', due_date: ex.start_date });
   });
 
   const cells: (number | null)[] = [
@@ -57,7 +76,7 @@ export default function CalendarTab({ data, labGroup }: Props) {
   const isSelected = (d: number) => selected?.getDate() === d && selected?.getMonth() === month && selected?.getFullYear() === year;
 
   const selectedKey = selected ? `${selected.getFullYear()}-${selected.getMonth()}-${selected.getDate()}` : '';
-  const selectedDeadlines = deadlinesByDate[selectedKey] || [];
+  const selectedEvents = eventsByDate[selectedKey] || [];
 
   const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
   const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
@@ -84,12 +103,10 @@ export default function CalendarTab({ data, labGroup }: Props) {
           </div>
         </div>
 
-        {/* Progress bar */}
         <div style={{ width: '100%', height: 8, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden', marginBottom: 14 }}>
           <div style={{ width: `${weekInfo.progressPercent}%`, height: '100%', background: '#4f46e5', borderRadius: 4, transition: 'width 0.3s' }} />
         </div>
 
-        {/* Milestones list */}
         <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 8, textTransform: 'uppercase' }}>Key Academic Milestones</div>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
           {milestones.map((m, i) => {
@@ -122,37 +139,40 @@ export default function CalendarTab({ data, labGroup }: Props) {
           <button onClick={nextMonth} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: 8, background: '#fff', fontSize: 13, cursor: 'pointer', fontWeight: 800 }}>Next ›</button>
         </div>
 
-        {/* Day Header */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, textAlign: 'center', fontWeight: 800, fontSize: 11, color: '#64748b', marginBottom: 8 }}>
           {DAYS_SHORT.map(d => <div key={d}>{d}</div>)}
         </div>
 
-        {/* Calendar Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
           {cells.map((d, i) => {
             if (!d) return <div key={i} style={{ height: 44 }} />;
             const key = getKey(d);
-            const events = deadlinesByDate[key] || [];
+            const evs = eventsByDate[key] || [];
             const isT = isToday(d);
             const isS = isSelected(d);
+            const hasExam = evs.some(e => e.type === 'exam');
 
             return (
               <button
                 key={i}
                 onClick={() => setSelected(new Date(year, month, d))}
                 style={{
-                  height: 44, borderRadius: 8, border: isS ? '2px solid #4f46e5' : isT ? '2px solid #38bdf8' : '1px solid #f1f5f9',
-                  background: isS ? '#4f46e5' : isT ? '#f0f9ff' : '#fff',
-                  color: isS ? '#fff' : isT ? '#0284c7' : '#0f172a',
+                  height: 44, borderRadius: 8,
+                  border: isS ? '2px solid #4f46e5' : isT ? '2px solid #38bdf8' : hasExam ? '2px solid #f59e0b' : '1px solid #f1f5f9',
+                  background: isS ? '#4f46e5' : isT ? '#f0f9ff' : hasExam ? '#fff7ed' : '#fff',
+                  color: isS ? '#fff' : isT ? '#0284c7' : hasExam ? '#78350f' : '#0f172a',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   cursor: 'pointer', position: 'relative'
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: isS || isT ? 900 : 600 }}>{d}</span>
-                {events.length > 0 && (
+                <span style={{ fontSize: 12, fontWeight: isS || isT || hasExam ? 900 : 600 }}>{d}</span>
+                {evs.length > 0 && (
                   <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
-                    {events.slice(0, 3).map((_, ei) => (
-                      <span key={ei} style={{ width: 4, height: 4, borderRadius: '50%', background: isS ? '#fff' : '#ef4444' }} />
+                    {evs.slice(0, 3).map((e, ei) => (
+                      <span key={ei} style={{
+                        width: 4, height: 4, borderRadius: '50%',
+                        background: isS ? '#fff' : e.type === 'exam' ? '#f59e0b' : '#ef4444'
+                      }} />
                     ))}
                   </div>
                 )}
@@ -162,19 +182,23 @@ export default function CalendarTab({ data, labGroup }: Props) {
         </div>
       </div>
 
-      {/* Selected Day Deadlines Detail */}
+      {/* Selected Day Events Detail */}
       {selected && (
         <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px' }}>
           <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>
             📅 {selected.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
-          {selectedDeadlines.length === 0 ? (
-            <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>No deadlines on this date</div>
+          {selectedEvents.length === 0 ? (
+            <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>No events or deadlines on this date</div>
           ) : (
-            selectedDeadlines.map((ev, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < selectedDeadlines.length - 1 ? '1px solid #e2e8f0' : 'none' }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{ev.title} ({ev.courseId})</span>
-                <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 800 }}>{formatTimeUntil(ev.due_date)}</span>
+            selectedEvents.map((ev, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < selectedEvents.length - 1 ? '1px solid #e2e8f0' : 'none' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: ev.type === 'exam' ? '#b45309' : '#0f172a' }}>
+                  {ev.title} {ev.courseId !== 'EXAM' ? `(${ev.courseId})` : ''}
+                </span>
+                <span style={{ fontSize: 11, color: ev.type === 'exam' ? '#d97706' : '#ef4444', fontWeight: 800 }}>
+                  {formatTimeUntil(ev.due_date)}
+                </span>
               </div>
             ))
           )}
