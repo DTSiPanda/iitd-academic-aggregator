@@ -1,13 +1,9 @@
 'use client';
 
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
-import {
-  formatTimeUntil, getUrgencyLevel, getResourceUrl,
-  getSemesterWeekInfo, isClassCancelled, getCourseNotes
-} from '@/lib/fetchData';
-import { DAYS, LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
+import { formatTimeUntil, getUrgencyLevel, getSemesterWeekInfo, isClassCancelled } from '@/lib/fetchData';
+import { LECTURE_SLOTS, LAB_SLOTS_BY_GROUP, COURSE_COLORS, TIME_ORDER, Slot } from '@/lib/scheduleData';
 import ExamBanner from '@/components/ui/ExamBanner';
-import NoteChip from '@/components/ui/NoteChip';
 
 interface Props {
   data: AggregatorData;
@@ -22,12 +18,9 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
   const tomorrowName = DAY_NAMES[(now.getDay() + 1) % 7];
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  // Official IITD Sem 1 2026-27 start — locked, do NOT use data.semester_timeline
   const weekInfo = getSemesterWeekInfo('2026-07-23', 17);
-
   const myLabs = LAB_SLOTS_BY_GROUP[labGroup] || [];
 
-  // Helper to fetch slots for a given day
   function getDaySlots(day: string): (Slot & { cancelled: boolean })[] {
     const lectures = LECTURE_SLOTS
       .filter(s => s.days?.includes(day))
@@ -43,7 +36,7 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
   const todaySlots = getDaySlots(todayName);
   const tomorrowSlots = getDaySlots(tomorrowName);
 
-  // Deadlines filtering (supporting groupwise vs wholeclass)
+  // Deadlines filtering
   const weekEnd = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
   const tomorrowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59).toISOString();
@@ -66,197 +59,76 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
 
   const todayDeadlines = allDeadlines.filter(d => d.due_date <= todayEnd);
   const tomorrowDeadlines = allDeadlines.filter(d => d.due_date > todayEnd && d.due_date <= tomorrowEnd);
-  const thisWeekDeadlines = allDeadlines.filter(d => d.due_date > tomorrowEnd && d.due_date <= weekEnd);
+  const upcomingDeadlines = allDeadlines.filter(d => d.due_date > tomorrowEnd);
+
+  // Next upcoming quiz
+  const nextQuiz = activeGroupOverrides[0] || null;
+  const daysLeftQuiz = nextQuiz
+    ? Math.ceil((new Date(nextQuiz.due_date).getTime() - now.getTime()) / 86400000)
+    : null;
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
+    <div style={{ maxWidth: 760, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-      {/* ── Semester Week Awareness Header ── */}
+      {/* ── Top Overview Banner ── */}
       <div style={{
-        background: '#0f172a', color: '#fff', borderRadius: 14, padding: '16px', marginBottom: 16,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        borderRadius: 16, padding: '16px 20px', color: '#fff',
+        boxShadow: '0 4px 14px rgba(15, 23, 42, 0.12)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12
       }}>
         <div>
-          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
-            IIT DELHI • SEMESTER 1 (2026-27)
+          <div style={{ fontSize: 10, fontWeight: 900, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+            SEMESTER PROGRESS
           </div>
-          <div style={{ fontSize: 20, fontWeight: 900, marginTop: 2 }}>
-            Week {weekInfo.currentWeek} <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>/ {weekInfo.totalWeeks}</span>
+          <div style={{ fontSize: 20, fontWeight: 900, marginTop: 2, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span>Week {weekInfo.currentWeek}</span>
+            <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>/ 17 Weeks</span>
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#38bdf8' }}>{todayName}</div>
-          <div style={{ fontSize: 11, color: '#94a3b8' }}>Group {labGroup.replace('group', '')}</div>
-        </div>
-      </div>
 
-      {/* ── Exam Banner ── */}
-      <ExamBanner exams={overrides.exams} />
-
-      {/* ── Quiz & Test Alert Banner (From Telegram Bot & Overrides) ── */}
-      {(() => {
-        const upcomingQuizzes = overrides.deadline_overrides
-          .filter(d => new Date(d.due_date).getTime() >= new Date().setHours(0,0,0,0))
-          .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
-
-        if (upcomingQuizzes.length === 0) return null;
-
-        const nextQuiz = upcomingQuizzes[0];
-        const days = Math.ceil((new Date(nextQuiz.due_date).getTime() - new Date().getTime()) / 86400000);
-        const courseColor = COURSE_COLORS[nextQuiz.course] || '#ef4444';
-
-        return (
-          <div style={{
-            background: 'linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%)',
-            border: '2px solid #ef4444',
-            borderRadius: 16, padding: '14px 16px', marginBottom: 16,
-            boxShadow: '0 4px 14px rgba(239, 68, 68, 0.15)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 900, color: '#991b1b', textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>⚡ UPCOMING QUIZ / TEST ALERT</span>
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#7f1d1d', marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 900, padding: '2px 8px', borderRadius: 6, background: courseColor, color: '#fff' }}>
-                    {nextQuiz.course}
-                  </span>
-                  <span>{nextQuiz.item}</span>
-                </div>
-                {nextQuiz.note && (
-                  <div style={{ fontSize: 11, color: '#991b1b', marginTop: 2 }}>
-                    💬 {nextQuiz.note}
-                  </div>
-                )}
-              </div>
-              <div style={{
-                background: days <= 1 ? '#dc2626' : days <= 3 ? '#ea580c' : '#ef4444',
-                color: '#fff', borderRadius: 20, padding: '8px 14px',
-                fontSize: 13, fontWeight: 900, flexShrink: 0, textAlign: 'center'
-              }}>
-                {days > 0 ? `In ${days}d` : 'TODAY'}
-              </div>
-            </div>
-
-            {upcomingQuizzes.length > 1 && (
-              <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #fca5a5', display: 'flex', gap: 8, overflowX: 'auto' }}>
-                {upcomingQuizzes.slice(1).map((q, idx) => {
-                  const qDays = Math.ceil((new Date(q.due_date).getTime() - new Date().getTime()) / 86400000);
-                  const qColor = COURSE_COLORS[q.course] || '#dc2626';
-                  return (
-                    <div key={idx} style={{
-                      background: '#ffffffb3', padding: '4px 8px', borderRadius: 6,
-                      fontSize: 11, color: '#7f1d1d', fontWeight: 700, flex: '0 0 auto',
-                      display: 'flex', alignItems: 'center', gap: 6
-                    }}>
-                      <span style={{ fontSize: 9, fontWeight: 900, padding: '1px 5px', borderRadius: 4, background: qColor, color: '#fff' }}>{q.course}</span>
-                      <span>{q.item}: <strong>In {qDays}d</strong></span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+        {nextQuiz && daysLeftQuiz !== null ? (
+          <div style={{ background: '#ffffff15', border: '1px solid #ffffff25', padding: '8px 12px', borderRadius: 10, textAlign: 'right' }}>
+            <div style={{ fontSize: 10, fontWeight: 900, color: '#f8fafc', textTransform: 'uppercase' }}>NEXT QUIZ / TEST</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#38bdf8', marginTop: 1 }}>{nextQuiz.course} — {nextQuiz.item}</div>
+            <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700 }}>{daysLeftQuiz === 0 ? 'TODAY' : `In ${daysLeftQuiz}d`}</div>
           </div>
-        );
-      })()}
-
-      {/* ── 1. TODAY'S ACTION PLAN ── */}
-      <div style={{
-        background: '#fff', border: '2px solid #3b82f6', borderRadius: 16, padding: '16px', marginBottom: 20,
-        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.08)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>📌</span>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#1e3a8a', margin: 0 }}>TODAY'S ACTION PLAN</h2>
-          </div>
-          <span style={{ fontSize: 11, fontWeight: 800, background: '#eff6ff', color: '#2563eb', padding: '3px 8px', borderRadius: 12 }}>
-            {todayName.toUpperCase()}
-          </span>
-        </div>
-
-        {/* Today's Classes */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' }}>Classes & Labs Today</div>
-          {todaySlots.length === 0 ? (
-            <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '8px 0' }}>No classes today 🎉</div>
-          ) : (
-            todaySlots.map((slot, i) => {
-              const color = COURSE_COLORS[slot.code] ?? '#64748b';
-              const notes = getCourseNotes(overrides.notes, slot.code);
-              return (
-                <div key={i} style={{
-                  background: slot.cancelled ? '#fef2f2' : '#f8fafc',
-                  borderLeft: `4px solid ${slot.cancelled ? '#ef4444' : color}`,
-                  borderRadius: 10, padding: '10px 12px', marginBottom: 8,
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 13, fontWeight: 900, color, textDecoration: slot.cancelled ? 'line-through' : 'none' }}>
-                        {slot.cancelled ? '❌ ' : ''}{slot.code} — {slot.course}
-                      </span>
-                      <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: slot.type === 'lab' ? '#fef3c7' : '#e0e7ff', color: slot.type === 'lab' ? '#92400e' : '#3730a3' }}>
-                        {slot.type === 'lab' ? 'Lab' : 'Lec'}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>📍 {slot.venue}</div>
-                    {notes.slice(0, 1).map((n, ni) => <NoteChip key={ni} note={n} />)}
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Today's Deadlines */}
-        {todayDeadlines.length > 0 && (
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#dc2626', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Today</div>
-            {todayDeadlines.map((d, i) => {
-              const color = COURSE_COLORS[d.course] || '#ef4444';
-              return (
-                <div key={i} style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 900, padding: '2px 6px', borderRadius: 4, background: color, color: '#fff' }}>{d.course}</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: '#991b1b' }}>{d.title}</span>
-                  </div>
-                  <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444' }}>{formatTimeUntil(d.due_date)}</span>
-                </div>
-              );
-            })}
+        ) : (
+          <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
+            📍 {todayName} • Group {labGroup.replace('group', '')}
           </div>
         )}
       </div>
 
-      {/* ── 2. TOMORROW'S ACTION PLAN ── */}
+      <ExamBanner exams={overrides.exams} />
+
+      {/* ── 1. TODAY'S ACTION PLAN ── */}
       <div style={{
-        background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px', marginBottom: 20,
+        background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: '16px 20px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>🔜</span>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#334155', margin: 0 }}>TOMORROW'S ACTION PLAN</h2>
+            <span style={{ fontSize: 16 }}>📌</span>
+            <h2 style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: 0 }}>TODAY'S SCHEDULE ({todayName.toUpperCase()})</h2>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 800, background: '#f1f5f9', color: '#475569', padding: '3px 8px', borderRadius: 12 }}>
-            {tomorrowName.toUpperCase()}
+          <span style={{ fontSize: 11, fontWeight: 800, background: '#eff6ff', color: '#2563eb', padding: '3px 8px', borderRadius: 12 }}>
+            {todaySlots.length} Classes Today
           </span>
         </div>
 
-        {/* Tomorrow's Classes */}
-        <div style={{ marginBottom: 8 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' }}>Tomorrow's Schedule</div>
-          {tomorrowSlots.length === 0 ? (
-            <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '8px 0' }}>No classes tomorrow 🎉</div>
+        {/* Classes Today */}
+        <div style={{ marginBottom: 12 }}>
+          {todaySlots.length === 0 ? (
+            <div style={{ fontSize: 13, color: '#64748b', fontStyle: 'italic', padding: '6px 0' }}>No classes today 🎉</div>
           ) : (
-            tomorrowSlots.map((slot, i) => {
+            todaySlots.map((slot, i) => {
               const color = COURSE_COLORS[slot.code] ?? '#64748b';
               return (
                 <div key={i} style={{
                   background: slot.cancelled ? '#fef2f2' : '#f8fafc',
-                  borderLeft: `4px solid ${slot.cancelled ? '#ef4444' : color}`, borderRadius: 10, padding: '10px 12px', marginBottom: 6,
+                  borderLeft: `4px solid ${slot.cancelled ? '#ef4444' : color}`,
+                  borderRadius: 10, padding: '10px 14px', marginBottom: 6,
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
                   <div>
@@ -272,61 +144,52 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
           )}
         </div>
 
-        {/* Tomorrow's Deadlines */}
-        {tomorrowDeadlines.length > 0 && (
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#d97706', marginBottom: 6, textTransform: 'uppercase' }}>⚠️ Due Tomorrow</div>
-            {tomorrowDeadlines.map((d, i) => {
-              const color = COURSE_COLORS[d.course] || '#f59e0b';
-              return (
-                <div key={i} style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 900, padding: '2px 6px', borderRadius: 4, background: color, color: '#fff' }}>{d.course}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#92400e' }}>{d.title}</span>
-                  </div>
-                  <span style={{ fontSize: 11, fontWeight: 900, color: '#f59e0b' }}>{formatTimeUntil(d.due_date)}</span>
-                </div>
-              );
-            })}
+        {/* Due Today */}
+        {todayDeadlines.length > 0 && (
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #fee2e2' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#dc2626', marginBottom: 6, textTransform: 'uppercase' }}>🚨 Due Today</div>
+            {todayDeadlines.map((d, i) => (
+              <div key={i} style={{ background: '#fef2f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '8px 12px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 12, fontWeight: 800, color: '#9f1239' }}>{d.course} — {d.title}</span>
+                <span style={{ fontSize: 11, fontWeight: 900, color: '#dc2626' }}>TODAY</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* ── 3. THIS WEEK'S ACTION PLAN ── */}
+      {/* ── 2. TOMORROW'S OUTLOOK ── */}
       <div style={{
-        background: '#fff', border: '2px solid #e2e8f0', borderRadius: 16, padding: '16px', marginBottom: 20
+        background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: '16px 20px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>🗓</span>
-            <h2 style={{ fontSize: 16, fontWeight: 900, color: '#334155', margin: 0 }}>THIS WEEK'S DEADLINES & GOALS</h2>
+            <span style={{ fontSize: 16 }}>🔜</span>
+            <h2 style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: 0 }}>TOMORROW'S SCHEDULE ({tomorrowName.toUpperCase()})</h2>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b' }}>{thisWeekDeadlines.length} items</span>
         </div>
 
-        {thisWeekDeadlines.length === 0 ? (
-          <div style={{ fontSize: 13, color: '#94a3b8', fontStyle: 'italic', padding: '8px 0' }}>No more deadlines this week 🎉</div>
+        {tomorrowSlots.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#64748b', fontStyle: 'italic', padding: '6px 0' }}>No classes tomorrow 🎉</div>
         ) : (
-          thisWeekDeadlines.map((d, i) => {
-            const urgency = getUrgencyLevel(d.due_date);
-            const color = COURSE_COLORS[d.course] ?? '#64748b';
+          tomorrowSlots.map((slot, i) => {
+            const color = COURSE_COLORS[slot.code] ?? '#64748b';
             return (
-              <a key={i} href={d.url} target="_blank" rel="noopener noreferrer" style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '10px 12px', borderBottom: i < thisWeekDeadlines.length - 1 ? '1px solid #f1f5f9' : 'none',
-                textDecoration: 'none'
+              <div key={i} style={{
+                background: slot.cancelled ? '#fef2f2' : '#f8fafc',
+                borderLeft: `4px solid ${slot.cancelled ? '#ef4444' : color}`,
+                borderRadius: 10, padding: '10px 14px', marginBottom: 6,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
                 <div>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{d.title}</span>
-                  <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, color, background: color + '15', padding: '1px 6px', borderRadius: 4 }}>{d.course}</span>
-                    {d.source === 'bot' && <span style={{ fontSize: 10, fontWeight: 800, color: '#7c3aed', background: '#f3e8ff', padding: '1px 6px', borderRadius: 4 }}>BOT</span>}
-                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: slot.cancelled ? '#ef4444' : color, textDecoration: slot.cancelled ? 'line-through' : 'none' }}>
+                    {slot.cancelled ? '❌ ' : ''}{slot.code} — {slot.course}
+                  </span>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>📍 {slot.venue}</div>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 900, color: urgency === 'critical' ? '#ef4444' : '#f59e0b' }}>
-                  {formatTimeUntil(d.due_date)}
-                </span>
-              </a>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</span>
+              </div>
             );
           })
         )}

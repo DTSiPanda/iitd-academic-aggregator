@@ -6,7 +6,6 @@ import { fetchData, fetchOverrides } from '@/lib/fetchData';
 import dynamic from 'next/dynamic';
 import GroupSelectorModal from '@/components/GroupSelectorModal';
 import GlobalSearch from '@/components/GlobalSearch';
-import SemesterTimelineHeader from '@/components/SemesterTimelineHeader';
 
 const TodayTab    = dynamic(() => import('@/components/tabs/TodayTab'));
 const WeekTab     = dynamic(() => import('@/components/tabs/WeekTab'));
@@ -45,7 +44,6 @@ export default function App() {
       .finally(() => setLoading(false));
     fetchOverrides().then(setOverrides);
 
-    // Supabase Realtime Subscription — Live instant updates without page refresh!
     const channel = supabase
       .channel('realtime_academic')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'overrides' }, (payload: any) => {
@@ -104,55 +102,70 @@ export default function App() {
       {showModal && <GroupSelectorModal onSelect={handleGroupSelect} />}
       <GlobalSearch data={data} isOpen={showSearch} onClose={() => setShowSearch(false)} />
 
-      {/* ── Compact Header Banner ── */}
-      <header className="header-banner" style={{ padding: '12px 16px' }}>
-        <div className="header-banner-inner">
+      {/* ── Sleek Integrated Header ── */}
+      <header style={{ background: '#0f172a', color: '#fff', borderBottom: '1px solid #1e293b' }}>
+        <div style={{
+          maxWidth: 1300, margin: '0 auto', padding: '12px 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
+        }}>
           <div>
-            <div className="header-institution" style={{ fontSize: 10, letterSpacing: 0.8 }}>INDIAN INSTITUTE OF TECHNOLOGY DELHI</div>
-            <h1 className="header-title-text" style={{ fontSize: 16, margin: 0 }}>Civil Engineering B.Tech</h1>
+            <div style={{ fontSize: 10, fontWeight: 900, color: '#38bdf8', letterSpacing: 0.8, textTransform: 'uppercase' }}>
+              IIT DELHI • B.TECH CIVIL
+            </div>
+            <h1 style={{ fontSize: 15, fontWeight: 800, margin: 0, color: '#f8fafc' }}>
+              Academic Aggregator
+            </h1>
           </div>
-          <div className="header-badges" style={{ gap: 8 }}>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
               onClick={() => setShowSearch(true)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px',
-                background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 8,
-                fontSize: 12, fontWeight: 700, color: '#475569', cursor: 'pointer'
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+                background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
+                fontSize: 12, fontWeight: 700, color: '#cbd5e1', cursor: 'pointer'
               }}
             >
               <span>🔍 Search</span>
             </button>
-            <button className="group-pill" onClick={() => setShowModal(true)} style={{ padding: '5px 10px', fontSize: 12 }}>
+            <button
+              onClick={() => setShowModal(true)}
+              style={{
+                padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 800,
+                background: '#38bdf815', color: '#38bdf8', border: '1px solid #38bdf840', cursor: 'pointer'
+              }}
+            >
               🔬 {groupLabel} ✎
             </button>
           </div>
         </div>
-      </header>
 
-      {/* ── Top Milestone & Exam Countdown Bar ── */}
-      <SemesterTimelineHeader timeline={data.semester_timeline} overrides={overrides} />
-
-      {/* ── Sticky Navy Navigation Bar ── */}
-      <nav className="nav-bar" style={{ position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-        <div className="nav-bar-inner">
-          <div className="tab-group" style={{ width: '100%', justifyContent: 'space-around' }}>
+        {/* ── Sticky Tab Bar ── */}
+        <nav style={{ background: '#1e293b', borderTop: '1px solid #334155' }}>
+          <div style={{ maxWidth: 1300, margin: '0 auto', display: 'flex', justifyContent: 'space-around' }}>
             {TABS.map(tab => (
               <button
                 key={tab.id}
-                className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
-                style={{ padding: '10px 12px', flex: '1 1 auto', justifyContent: 'center' }}
+                style={{
+                  flex: '1 1 0', padding: '10px 8px', fontSize: 12, fontWeight: 800,
+                  color: activeTab === tab.id ? '#38bdf8' : '#94a3b8',
+                  borderBottom: activeTab === tab.id ? '3px solid #38bdf8' : '3px solid transparent',
+                  background: activeTab === tab.id ? 'rgba(56,189,248,0.06)' : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  cursor: 'pointer', transition: 'all 0.15s ease'
+                }}
               >
-                <span className="tab-icon">{tab.icon}</span>
+                <span>{tab.icon}</span>
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
-      {/* ── Main Tab Content ── */}
-      <main className="tab-content" style={{ padding: '16px 12px' }}>
+      {/* ── Main Content Area ── */}
+      <main style={{ maxWidth: 1200, margin: '0 auto', width: '100%', flex: 1, padding: '16px 12px' }}>
         {activeTab === 'today' && labGroup && (
           <TodayTab data={data} labGroup={labGroup} overrides={overrides} />
         )}
@@ -167,7 +180,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="app-footer">
+      <footer style={{ background: '#0f172a', color: '#64748b', padding: '14px', textAlign: 'center', fontSize: 11, fontWeight: 600 }}>
         IIT Delhi Civil Engineering • Semester 1 (2026–2027)
       </footer>
     </div>
