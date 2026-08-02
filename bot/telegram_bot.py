@@ -288,15 +288,27 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_msg = update.message.text
     group = _get_group(context)
 
+    # Rolling multi-turn conversation memory
+    if "chat_history" not in context.user_data:
+        context.user_data["chat_history"] = []
+    history = context.user_data["chat_history"]
+
     await update.message.chat.send_action("typing")
 
     try:
-        tool_calls = process_message(user_msg)
+        tool_calls = process_message(user_msg, history=history)
         replies = []
         for call in tool_calls:
             result = execute_tool(call["tool"], call["args"], user_group=group)
             replies.append(result)
         response = "\n\n".join(replies)
+
+        # Store in rolling history (keep last 10 turns = 20 messages)
+        history.append({"role": "user", "text": user_msg})
+        history.append({"role": "model", "text": response})
+        if len(history) > 20:
+            context.user_data["chat_history"] = history[-20:]
+
     except Exception as e:
         response = f"⚠️ Error processing message: {str(e)}"
 
