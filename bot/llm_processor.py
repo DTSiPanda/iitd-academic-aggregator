@@ -9,6 +9,8 @@ import os
 import json
 from google import genai
 from google.genai import types
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from config import GEMINI_API_KEY, SCHEDULE_CONTEXT
 
 client = genai.Client(api_key=GEMINI_API_KEY)

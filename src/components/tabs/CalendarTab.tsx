@@ -64,8 +64,15 @@ export default function CalendarTab({ data, labGroup, overrides }: Props) {
     const dateObj = new Date(ex.start_date);
     const key = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
     if (!eventsByDate[key]) eventsByDate[key] = [];
-    const courseCode = (ex.courses && ex.courses[0]) || 'EXAM';
-    eventsByDate[key].push({ title: `📝 EXAM: ${ex.name}`, courseId: courseCode, type: 'exam', url: '#', due_date: ex.start_date });
+    const courseCode = (ex.courses && ex.courses.length > 0) ? ex.courses[0] : 'EXAM';
+    const coursesStr = (ex.courses && ex.courses.length > 0) ? ` [${ex.courses.join(', ')}]` : '';
+    eventsByDate[key].push({
+      title: `📝 ${ex.name}${coursesStr}`,
+      courseId: courseCode,
+      type: 'exam',
+      url: '#',
+      due_date: ex.start_date
+    });
   });
 
   const cells: (number | null)[] = [
