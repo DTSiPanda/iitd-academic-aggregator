@@ -34,7 +34,8 @@ from tools import execute_tool
 load_dotenv()
 
 TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-OWNER_ID = int(os.environ["TELEGRAM_OWNER_ID"])  # Only this user can use the bot
+OWNER_ID = int(os.environ["TELEGRAM_OWNER_ID"])  # Primary owner
+ALLOWED_IDS = {OWNER_ID, 8727557578}  # All authorized users
 OVERRIDES_PATH = os.path.join(os.path.dirname(__file__), "overrides.json")
 DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "public", "data.json")
 SCHEDULES_PATH = os.path.join(os.path.dirname(__file__), "..", "lab_schedules", "schedules.json")
@@ -71,7 +72,7 @@ def _get_group(context: ContextTypes.DEFAULT_TYPE) -> str:
 # ── Command Handlers ──────────────────────────────────────────────────────────
 
 def _is_owner(update: Update) -> bool:
-    return update.effective_user.id == OWNER_ID
+    return update.effective_user.id in ALLOWED_IDS
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -101,7 +102,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def group_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != OWNER_ID:
+    if update.effective_user.id not in ALLOWED_IDS:
         return
     query = update.callback_query
     await query.answer()
@@ -423,7 +424,7 @@ async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def remove_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != OWNER_ID:
+    if update.effective_user.id not in ALLOWED_IDS:
         return
     query = update.callback_query
     await query.answer()
