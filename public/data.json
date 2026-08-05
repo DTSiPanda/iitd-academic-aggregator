@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-05T13:51:58.485148+00:00",
+  "last_updated": "2026-08-05T16:28:40.050505+00:00",
   "courses": [
     {
       "id": "CVL2502",
@@ -65,7 +65,7 @@
           "url": "/files/CVL2401/Course_Outline.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-05T13:51:58.485148+00:00",
+          "uploaded_at": "2026-08-05T16:28:40.050505+00:00",
           "is_new": false
         }
       ],
@@ -87,7 +87,7 @@
           "url": "/files/CVP2401/Assignment_01_Resourse.pdf",
           "category": "tutorial",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-05T13:51:58.485148+00:00",
+          "uploaded_at": "2026-08-05T16:28:40.050505+00:00",
           "is_new": false
         },
         {
@@ -101,7 +101,7 @@
             "group3": "Monday at 1:00 - 3:00 PM",
             "group4": "Tuesday at 1:00 - 3:00 PM"
           },
-          "uploaded_at": "2026-08-05T13:51:58.485148+00:00",
+          "uploaded_at": "2026-08-05T16:28:40.050505+00:00",
           "is_new": false
         }
       ],
@@ -140,7 +140,7 @@
             "group3": "Thursday at 3:00 - 5:00 PM",
             "group4": "Friday at 3:00 - 5:00 PM"
           },
-          "uploaded_at": "2026-08-05T13:51:58.485148+00:00",
+          "uploaded_at": "2026-08-05T16:28:40.050505+00:00",
           "is_new": false
         },
         {
@@ -149,7 +149,7 @@
           "url": "/files/CVP2502/Schedule__Expt_1-5.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-05T13:51:58.485148+00:00",
+          "uploaded_at": "2026-08-05T16:28:40.050505+00:00",
           "is_new": false
         },
         {
@@ -158,7 +158,7 @@
           "url": "/files/CVP2502/Subgroups__Expt_1-5.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-05T13:51:58.485148+00:00",
+          "uploaded_at": "2026-08-05T16:28:40.050505+00:00",
           "is_new": false
         }
       ],
