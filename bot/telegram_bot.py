@@ -35,11 +35,37 @@ from tools import execute_tool, PUBLIC_OVERRIDES_PATH, _push_to_supabase
 load_dotenv()
 
 TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-OWNER_ID = int(os.environ["TELEGRAM_OWNER_ID"])  # Primary owner
-ALLOWED_IDS = {OWNER_ID, 8727557578}  # All authorized users
+OWNER_ID = int(os.environ["TELEGRAM_OWNER_ID"])  # Always has access
 OVERRIDES_PATH = os.path.join(os.path.dirname(__file__), "overrides.json")
 DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "public", "data.json")
 SCHEDULES_PATH = os.path.join(os.path.dirname(__file__), "..", "lab_schedules", "schedules.json")
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
+# --- Auth cache: reload from Supabase at most every 5 minutes ---
+_auth_cache: set[int] = {OWNER_ID}
+_auth_cache_time: float = 0.0
+_AUTH_TTL = 300  # seconds
+
+def _get_allowed_ids() -> set[int]:
+    """Return the set of authorized Telegram IDs, refreshed from Supabase every 5 min."""
+    import time
+    global _auth_cache, _auth_cache_time
+    if time.time() - _auth_cache_time < _AUTH_TTL:
+        return _auth_cache
+    try:
+        from supabase import create_client
+        sp = create_client(SUPABASE_URL, SUPABASE_KEY)
+        rows = sp.table("authorized_users").select("telegram_id").execute()
+        ids = {int(r["telegram_id"]) for r in (rows.data or [])}
+        ids.add(OWNER_ID)  # Owner always included
+        _auth_cache = ids
+        _auth_cache_time = time.time()
+        logging.info(f"[Auth] Loaded {len(ids)} authorized users from Supabase")
+    except Exception as e:
+        logging.warning(f"[Auth] Could not load from Supabase, using cached list: {e}")
+    return _auth_cache
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -73,7 +99,7 @@ def _get_group(context: ContextTypes.DEFAULT_TYPE) -> str:
 # ── Command Handlers ──────────────────────────────────────────────────────────
 
 def _is_owner(update: Update) -> bool:
-    return update.effective_user.id in ALLOWED_IDS
+    return update.effective_user.id in _get_allowed_ids()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -103,7 +129,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def group_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id not in ALLOWED_IDS:
+    if update.effective_user.id not in _get_allowed_ids():
         return
     query = update.callback_query
     await query.answer()
@@ -425,7 +451,7 @@ async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def remove_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id not in ALLOWED_IDS:
+    if update.effective_user.id not in _get_allowed_ids():
         return
     query = update.callback_query
     await query.answer()
