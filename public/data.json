@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-09T17:33:37.952902+00:00",
+  "last_updated": "2026-08-09T17:42:22.795Z",
   "courses": [
     {
       "id": "CVL2502",
@@ -28,9 +28,9 @@
     {
       "id": "MEP1000",
       "name": "Introduction to Engineering Systems",
-      "moodle": "new",
+      "moodle": "old",
       "color": "#14b8a6",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=10374",
+      "url": "https://moodle.iitd.ac.in/course/view.php?id=25754",
       "instructor": "TBA",
       "credits": 2,
       "venue": null,
