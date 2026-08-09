@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { AggregatorData, LabGroup, Overrides } from '@/types/schema';
-import { fetchData, fetchOverrides } from '@/lib/fetchData';
+import { fetchData, fetchOverrides, fetchSchedules } from '@/lib/fetchData';
 import dynamic from 'next/dynamic';
 import GroupSelectorModal from '@/components/GroupSelectorModal';
 import GlobalSearch from '@/components/GlobalSearch';
@@ -39,8 +39,22 @@ export default function App() {
   const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
+    // Fetch Moodle data (courses, assignments, files) from Supabase
+    // then overlay fresh schedule data from public/schedules.json
     fetchData()
-      .then(setData)
+      .then(async (moodleData) => {
+        const schedule = await fetchSchedules();
+        if (schedule) {
+          setData({
+            ...moodleData,
+            lab_schedules: schedule.lab_schedules as AggregatorData['lab_schedules'],
+            lecture_schedule: schedule.lecture_schedule,
+            ...(schedule.semester_timeline ? { semester_timeline: schedule.semester_timeline } : {}),
+          });
+        } else {
+          setData(moodleData);
+        }
+      })
       .catch(() => setError('Could not load data.json. Run the scraper first.'))
       .finally(() => setLoading(false));
     fetchOverrides().then(setOverrides);

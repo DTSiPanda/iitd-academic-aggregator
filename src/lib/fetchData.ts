@@ -24,6 +24,31 @@ export async function fetchData(): Promise<AggregatorData> {
   return res.json();
 }
 
+/**
+ * Fetches the manually-maintained schedule (lab groups, lectures, semester timeline)
+ * directly from public/schedules.json — always fresh, never goes through Supabase.
+ * This means schedule changes reflect immediately without needing a scraper run.
+ */
+export async function fetchSchedules(): Promise<{
+  lab_schedules: AggregatorData['lab_schedules'];
+  lecture_schedule: AggregatorData['lecture_schedule'];
+  semester_timeline?: AggregatorData['semester_timeline'];
+} | null> {
+  try {
+    const res = await fetch('/schedules.json', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const s = await res.json();
+    return {
+      lab_schedules: s.lab_groups ?? {},
+      lecture_schedule: s.lecture_schedule ?? {},
+      semester_timeline: s.semester_timeline,
+    };
+  } catch {
+    return null;
+  }
+}
+
+
 export interface SemesterWeekInfo {
   currentWeek: number;
   totalWeeks: number;

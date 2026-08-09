@@ -1,0 +1,222 @@
+{
+  "semester": "Semester 1, 2026-2027",
+  "department": "Civil Engineering B.Tech",
+  "semester_timeline": {
+    "start_date": "2026-07-27",
+    "end_date": "2026-11-25",
+    "total_weeks": 14,
+    "milestones": [
+      { "name": "Semester Begins", "date": "2026-07-27", "type": "info" },
+      { "name": "Mid-Sem / Minor Exams", "date": "2026-09-14", "type": "exam" },
+      { "name": "Mid-Semester Break", "date": "2026-09-21", "type": "break" },
+      { "name": "Major / Endsem Exams", "date": "2026-11-16", "type": "exam" }
+    ]
+  },
+  "lecture_schedule": {
+    "Monday": [
+      { "course": "CVL1301", "time": "8:00 - 8:50 AM",  "venue": "WS 101 (SeNSE)" },
+      { "course": "CVL2001", "time": "12:00 - 12:50 PM", "venue": "LH 108" }
+    ],
+    "Tuesday": [
+      { "course": "CVL2702", "time": "8:00 - 8:50 AM",  "venue": "LH 416" },
+      { "course": "CVL2601", "time": "9:00 - 9:50 AM",  "venue": "LH 416" },
+      { "course": "CVL2502", "time": "10:00 - 10:50 AM", "venue": "WS 101 (SeNSE)" },
+      { "course": "CVL2401", "time": "11:00 - 11:50 AM", "venue": "Block VI, LT 2", "note": "Rescheduled from Mon/Thu" },
+      { "course": "CVL2001", "time": "12:00 - 12:50 PM", "venue": "LH 108" },
+      { "course": "MEP1000", "time": "5:00 - 6:00 PM",  "venue": "Dogra Hall", "type": "lecture" }
+    ],
+    "Wednesday": [
+      { "course": "CVL2702", "time": "8:00 - 8:50 AM",  "venue": "LH 416" },
+      { "course": "CVL2601", "time": "9:00 - 9:50 AM",  "venue": "LH 416" },
+      { "course": "CVL2502", "time": "10:00 - 10:50 AM", "venue": "WS 101 (SeNSE)" }
+    ],
+    "Thursday": [
+      { "course": "CVL1301", "time": "8:00 - 8:50 AM",  "venue": "WS 101 (SeNSE)" }
+    ],
+    "Friday": [
+      { "course": "CVL2702", "time": "8:00 - 8:50 AM",  "venue": "LH 416" },
+      { "course": "CVL2502", "time": "10:00 - 10:50 AM", "venue": "WS 101 (SeNSE)" },
+      { "course": "CVL2401", "time": "11:00 - 11:50 AM", "venue": "Block VI, LT 2", "note": "Rescheduled from Mon/Thu" },
+      { "course": "CVL2001", "time": "12:00 - 12:50 PM", "venue": "LH 108", "note": "May not happen — depends on professor. Check before attending." }
+    ]
+  },
+  "courses": [
+    {
+      "id": "CVL1301",
+      "name": "Surveying & Remote Sensing",
+      "type": "Lecture",
+      "credits": 2,
+      "instructor": "Sri Harsha Kota",
+      "venue": "WS 101 (SeNSE)",
+      "moodle": "unknown",
+      "schedule": [
+        { "day": "Monday", "time": "8:00 - 8:50 AM" },
+        { "day": "Thursday", "time": "8:00 - 8:50 AM" }
+      ]
+    },
+    {
+      "id": "CVL2001",
+      "name": "Climate Change & Adaptation",
+      "type": "Lecture",
+      "credits": 2,
+      "instructor": "Gazala Habib",
+      "venue": "LH 108",
+      "moodle": "unknown",
+      "schedule": [
+        { "day": "Monday", "time": "12:00 - 12:50 PM" },
+        { "day": "Tuesday", "time": "12:00 - 12:50 PM" },
+        { "day": "Friday", "time": "12:00 - 12:50 PM" }
+      ]
+    },
+    {
+      "id": "CVL2401",
+      "name": "Geological Engineering",
+      "type": "Lecture",
+      "credits": 2,
+      "instructor": "Bappaditya Manna",
+      "venue": "Block VI, LT 2",
+      "moodle": "unknown",
+      "note": "Rescheduled (28-07-2026): Moved from Mon/Thu 10AM to Tue & Fri 11-12 AM. First class 28 Jul.",
+      "schedule": [
+        { "day": "Tuesday", "time": "11:00 - 11:50 AM" },
+        { "day": "Friday", "time": "11:00 - 11:50 AM" }
+      ]
+    },
+    {
+      "id": "CVL2502",
+      "name": "Analysis of Determinate Structures",
+      "type": "Lecture",
+      "credits": 3,
+      "instructor": "Sahil Bansal",
+      "venue": "WS 101 (SeNSE)",
+      "moodle": "unknown",
+      "schedule": [
+        { "day": "Tuesday", "time": "10:00 - 10:50 AM" },
+        { "day": "Wednesday", "time": "10:00 - 10:50 AM" },
+        { "day": "Friday", "time": "10:00 - 10:50 AM" }
+      ]
+    },
+    {
+      "id": "CVL2601",
+      "name": "Traffic & Transportation Planning",
+      "type": "Lecture",
+      "credits": 2,
+      "instructor": "Pramesh Kumar",
+      "venue": "LH 416",
+      "moodle": "unknown",
+      "schedule": [
+        { "day": "Tuesday", "time": "9:00 - 9:50 AM" },
+        { "day": "Wednesday", "time": "9:00 - 9:50 AM" },
+        { "day": "Friday", "time": "9:00 - 9:50 AM" }
+      ]
+    },
+    {
+      "id": "CVL2702",
+      "name": "Hydraulics",
+      "type": "Lecture",
+      "credits": 3,
+      "instructor": "Saumava Dey",
+      "venue": "LH 416",
+      "moodle": "unknown",
+      "schedule": [
+        { "day": "Tuesday", "time": "8:00 - 8:50 AM" },
+        { "day": "Wednesday", "time": "8:00 - 8:50 AM" },
+        { "day": "Friday", "time": "8:00 - 8:50 AM" }
+      ]
+    },
+    {
+      "id": "MEP1000",
+      "name": "Introduction to Engineering Systems",
+      "type": "Lecture+Lab",
+      "credits": 2,
+      "instructor": "TBA",
+      "venue_lecture": "Dogra Hall",
+      "venue_lab": "CSC",
+      "moodle": "unknown",
+      "note": "Lecture: Dogra Hall, Tue 5-6 PM (from 28 Jul). Lab: CSC, 9:00-12:00 Mon (Gr 1 & 2) & Thu (Gr 3 & 4), from 27 Jul.",
+      "schedule": [
+        { "day": "Tuesday", "time": "5:00 - 6:00 PM", "type": "lecture" }
+      ]
+    }
+  ],
+  "labs": [
+    {
+      "id": "CVP2401",
+      "name": "Geological Engineering Lab",
+      "credits": 1,
+      "instructor": "Deepanshu Shirole",
+      "venue": "Block IV, Rm 331 (Geology Lab)"
+    },
+    {
+      "id": "CVP2502",
+      "name": "Solid Mechanics & Structural Lab",
+      "credits": 1,
+      "instructor": "Allan Lambor Marbaniang",
+      "venue": "Block V, Rm 216 (Structural Lab)"
+    },
+    {
+      "id": "CVP2601",
+      "name": "Traffic & Transport Planning Lab",
+      "credits": 1,
+      "instructor": "Pramesh Kumar",
+      "venue": "Computational Lab, 4-A-8",
+      "note": "Venue confirmed 28 Jul. First class 28 Jul."
+    },
+    {
+      "id": "CVP2702",
+      "name": "Fluid Mechanics & Hydraulics Lab",
+      "credits": 1,
+      "instructor": "Deo Raj Kaushal",
+      "venue": "Block V, V312/V313 (Simulation Lab)",
+      "note": "Venue confirmed."
+    }
+  ],
+  "lab_groups": {
+    "group1": [
+      { "course": "CVP2502", "day": "Monday",   "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Tuesday",  "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Friday",   "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF1)" },
+      { "course": "CVP2702", "day": "Thursday", "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "MEP1000", "day": "Monday",   "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 1 & 2 together" }
+    ],
+    "group2": [
+      { "course": "CVP2502", "day": "Tuesday",  "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Thursday", "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Monday",   "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF2)" },
+      { "course": "CVP2702", "day": "Friday",   "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "MEP1000", "day": "Monday",   "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 1 & 2 together" }
+    ],
+    "group3": [
+      { "course": "CVP2401", "day": "Tuesday",  "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF3)" },
+      { "course": "CVP2702", "day": "Monday",   "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "CVP2502", "day": "Thursday", "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Friday",   "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "MEP1000", "day": "Thursday", "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 3 & 4 together" }
+    ],
+    "group4": [
+      { "course": "CVP2601", "day": "Monday",   "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Thursday", "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF4)" },
+      { "course": "CVP2702", "day": "Tuesday",  "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "CVP2502", "day": "Friday",   "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "MEP1000", "day": "Thursday", "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 3 & 4 together" }
+    ]
+  },
+  "notices": [
+    {
+      "course": "CVL2401",
+      "notice": "Rescheduled (Notice 28-07-2026): Moved from Mon/Thu 10 AM to Tue & Fri 11–12 AM. First class 28 Jul."
+    },
+    {
+      "course": "CVP2702",
+      "notice": "Venue Confirmed: Fluid Mechanics & Hydraulics Lab → Block V, V312/V313 (Simulation Lab), 3:00-4:50 PM."
+    },
+    {
+      "course": "CVP2601",
+      "notice": "Venue Confirmed: Traffic & Transport Planning Lab → Block IV, 3rd Floor, Room 4-A-8 (Computational Lab), 3:00 PM (Slot PD4). First class 28 Jul."
+    },
+    {
+      "course": "MEP1000",
+      "notice": "Intro to Engineering Systems: Lecture Dogra Hall, Tue 5–6 PM (from 28 Jul). Lab: CSC, 9:00–12:00 — Mon (Gr 1 & 2) & Thu (Gr 3 & 4), from 27 Jul."
+    }
+  ]
+}

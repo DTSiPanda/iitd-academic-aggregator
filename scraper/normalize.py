@@ -289,7 +289,7 @@ def load_lab_schedules() -> tuple[dict, dict, dict]:
     """Load the manually maintained lab, lecture schedules, and semester_timeline."""
     global STATIC_COURSES_META
     schedule_path = os.path.join(
-        os.path.dirname(__file__), "..", "lab_schedules", "schedules.json"
+        os.path.dirname(__file__), "..", "public", "schedules.json"
     )
     if os.path.exists(schedule_path):
         with open(schedule_path, "r", encoding="utf-8") as f:
