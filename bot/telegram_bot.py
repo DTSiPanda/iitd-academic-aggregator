@@ -30,7 +30,7 @@ from telegram.ext import (
 )
 from dotenv import load_dotenv
 from llm_processor import process_message
-from tools import execute_tool, PUBLIC_OVERRIDES_PATH, _push_to_supabase
+from tools import execute_tool, PUBLIC_OVERRIDES_PATH, _push_to_supabase, _load as _load_overrides, _save
 
 load_dotenv()
 
@@ -74,10 +74,6 @@ logging.basicConfig(
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
-
-def _load_overrides() -> dict:
-    with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def _load_data() -> dict:
@@ -440,13 +436,8 @@ async def remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def clear_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _is_owner(update):
         return
-    import json as _json
     overrides = {"cancellations": [], "deadline_overrides": [], "exams": [], "notes": [], "flagged": [], "lab_done": []}
-    with open(OVERRIDES_PATH, "w", encoding="utf-8") as f:
-        _json.dump(overrides, f, indent=2)
-    with open(PUBLIC_OVERRIDES_PATH, "w", encoding="utf-8") as f:
-        _json.dump(overrides, f, indent=2)
-    _push_to_supabase(overrides)
+    _save(overrides)
     await update.message.reply_text("🗑️ All bot additions & overrides cleared successfully!")
 
 
@@ -457,43 +448,55 @@ async def remove_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     data = query.data
 
-    import json as _json
-    with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
-        overrides = _json.load(f)
+    overrides = _load_overrides()
 
     if data == "del_ALL":
         overrides = {"cancellations": [], "deadline_overrides": [], "exams": [], "notes": [], "flagged": [], "lab_done": []}
         msg = "🗑 All overrides cleared!"
     elif data.startswith("del_exam_"):
         idx = int(data.split("_")[-1])
-        removed = overrides["exams"].pop(idx)
-        msg = f"✅ Removed exam: {removed['name']}"
+        if 0 <= idx < len(overrides.get("exams", [])):
+            removed = overrides["exams"].pop(idx)
+            msg = f"✅ Removed exam: {removed['name']}"
+        else:
+            msg = "Item no longer found."
     elif data.startswith("del_deadline_"):
         idx = int(data.split("_")[-1])
-        removed = overrides["deadline_overrides"].pop(idx)
-        msg = f"✅ Removed deadline: {removed['item']} ({removed['course']})"
+        if 0 <= idx < len(overrides.get("deadline_overrides", [])):
+            removed = overrides["deadline_overrides"].pop(idx)
+            msg = f"✅ Removed deadline: {removed['item']} ({removed['course']})"
+        else:
+            msg = "Item no longer found."
     elif data.startswith("del_note_"):
         idx = int(data.split("_")[-1])
-        removed = overrides["notes"].pop(idx)
-        msg = f"✅ Removed note: {removed['text'][:40]}"
+        if 0 <= idx < len(overrides.get("notes", [])):
+            removed = overrides["notes"].pop(idx)
+            msg = f"✅ Removed note: {removed['text'][:40]}"
+        else:
+            msg = "Item no longer found."
     elif data.startswith("del_cancel_"):
         idx = int(data.split("_")[-1])
-        removed = overrides["cancellations"].pop(idx)
-        msg = f"✅ Removed cancellation: {removed['course']} {removed['day']}"
+        if 0 <= idx < len(overrides.get("cancellations", [])):
+            removed = overrides["cancellations"].pop(idx)
+            msg = f"✅ Removed cancellation: {removed['course']} {removed['day']}"
+        else:
+            msg = "Item no longer found."
     elif data.startswith("del_lab_"):
         idx = int(data.split("_")[-1])
-        removed = overrides["lab_done"].pop(idx)
-        # Also remove corresponding deadline_override if present
-        overrides["deadline_overrides"] = [
-            d for d in overrides["deadline_overrides"]
-            if not (d["course"] == removed["course"] and "Lab Report" in d["item"])
-        ]
-        msg = f"✅ Removed lab entry: {removed['course']}"
+        if 0 <= idx < len(overrides.get("lab_done", [])):
+            removed = overrides["lab_done"].pop(idx)
+            # Also remove corresponding deadline_override if present
+            overrides["deadline_overrides"] = [
+                d for d in overrides.get("deadline_overrides", [])
+                if not (d["course"] == removed["course"] and "Lab Report" in d["item"])
+            ]
+            msg = f"✅ Removed lab entry: {removed['course']}"
+        else:
+            msg = "Item no longer found."
     else:
         msg = "Unknown action."
 
     # Save + push to Supabase
-    from tools import _save
     _save(overrides)
 
     await query.edit_message_text(msg)

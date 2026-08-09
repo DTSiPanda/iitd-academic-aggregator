@@ -274,6 +274,99 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
         else:
             return f"✅ Lab done logged for {course}. (Could not auto-calculate deadline — group not set)"
 
+    elif tool_name == "remove_override":
+        category = args.get("category", "any")
+        course = args.get("course", "").upper().strip()
+        query = args.get("query", "").lower().strip()
+
+        removed_count = 0
+        removed_items = []
+
+        # Deadlines
+        if category in ["any", "deadlines", "deadline_overrides", "all"]:
+            kept = []
+            for d in data.get("deadline_overrides", []):
+                match = True
+                if course and d.get("course", "").upper() != course:
+                    match = False
+                if query and query not in d.get("item", "").lower() and query not in d.get("note", "").lower():
+                    match = False
+                if match and (course or query or category != "any"):
+                    removed_count += 1
+                    removed_items.append(f"Deadline: {d['course']} — {d['item']}")
+                else:
+                    kept.append(d)
+            data["deadline_overrides"] = kept
+
+        # Exams
+        if category in ["any", "exams", "all"]:
+            kept = []
+            for e in data.get("exams", []):
+                match = True
+                if course and course not in [c.upper() for c in e.get("courses", [])]:
+                    match = False
+                if query and query not in e.get("name", "").lower() and query not in e.get("note", "").lower():
+                    match = False
+                if match and (course or query or category != "any"):
+                    removed_count += 1
+                    removed_items.append(f"Exam: {e['name']}")
+                else:
+                    kept.append(e)
+            data["exams"] = kept
+
+        # Notes
+        if category in ["any", "notes", "all"]:
+            kept = []
+            for n in data.get("notes", []):
+                match = True
+                if course and n.get("course", "").upper() != course:
+                    match = False
+                if query and query not in n.get("text", "").lower():
+                    match = False
+                if match and (course or query or category != "any"):
+                    removed_count += 1
+                    removed_items.append(f"Note: {n['course']} — {n['text'][:30]}")
+                else:
+                    kept.append(n)
+            data["notes"] = kept
+
+        # Cancellations
+        if category in ["any", "cancellations", "all"]:
+            kept = []
+            for c in data.get("cancellations", []):
+                match = True
+                if course and c.get("course", "").upper() != course:
+                    match = False
+                if query and query not in c.get("day", "").lower() and query not in c.get("note", "").lower():
+                    match = False
+                if match and (course or query or category != "any"):
+                    removed_count += 1
+                    removed_items.append(f"Cancellation: {c['course']} {c['day']}")
+                else:
+                    kept.append(c)
+            data["cancellations"] = kept
+
+        # Lab done
+        if category in ["any", "lab_done", "all"]:
+            kept = []
+            for l in data.get("lab_done", []):
+                match = True
+                if course and l.get("course", "").upper() != course:
+                    match = False
+                if query and query not in l.get("experiment", "").lower():
+                    match = False
+                if match and (course or query or category != "any"):
+                    removed_count += 1
+                    removed_items.append(f"Lab: {l['course']} {l.get('experiment', '')}")
+                else:
+                    kept.append(l)
+            data["lab_done"] = kept
+
+        _save(data)
+        if removed_count > 0:
+            return f"🗑️ Removed {removed_count} item(s):\n• " + "\n• ".join(removed_items)
+        return "No matching override found to remove."
+
     elif tool_name == "general_reply":
         return args.get("reply", "Got it!")
 

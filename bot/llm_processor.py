@@ -102,6 +102,22 @@ TOOLS = [
         }
     },
     {
+        "name": "remove_override",
+        "description": "Remove or delete an existing override (deadline, assignment, quiz, exam, note, cancellation, or lab report) when the user asks to remove/delete/cancel something.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "enum": ["deadlines", "exams", "notes", "cancellations", "lab_done", "any"],
+                    "description": "Category of item to remove (default: any)"
+                },
+                "course": {"type": "string", "description": "Course code e.g. CVP2401 or CVL2702 if mentioned"},
+                "query": {"type": "string", "description": "Keywords matching the item to delete e.g. 'assignment', 'geology', 'quiz 1', 'hydraulics'"}
+            }
+        }
+    },
+    {
         "name": "general_reply",
         "description": "Use when the message is a question or doesn't map to any structured action. Reply conversationally.",
         "parameters": {
