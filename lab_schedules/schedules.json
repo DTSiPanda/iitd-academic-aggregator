@@ -35,10 +35,9 @@
     ],
     "Friday": [
       { "course": "CVL2702", "time": "8:00 - 8:50 AM",  "venue": "LH 416" },
-      { "course": "CVL2601", "time": "9:00 - 9:50 AM",  "venue": "LH 416" },
       { "course": "CVL2502", "time": "10:00 - 10:50 AM", "venue": "WS 101 (SeNSE)" },
       { "course": "CVL2401", "time": "11:00 - 11:50 AM", "venue": "Block VI, LT 2", "note": "Rescheduled from Mon/Thu" },
-      { "course": "CVL2001", "time": "12:00 - 12:50 PM", "venue": "LH 108" }
+      { "course": "CVL2001", "time": "12:00 - 12:50 PM", "venue": "LH 108", "note": "May not happen — depends on professor. Check before attending." }
     ]
   },
   "courses": [
@@ -174,31 +173,31 @@
   ],
   "lab_groups": {
     "group1": [
-      { "course": "CVP2502", "day": "Monday", "time": "3:00 - 5:00 PM", "venue": "Block V, Rm 216" },
-      { "course": "CVP2601", "day": "Tuesday", "time": "3:00 - 5:00 PM", "venue": "Blk IV-3F, 4-A-8" },
-      { "course": "CVP2401", "day": "Thursday", "time": "1:00 - 3:00 PM", "venue": "Block IV, Rm 331" },
-      { "course": "CVP2702", "day": "Thursday", "time": "3:00 - 5:00 PM", "venue": "Blk V, V312/V313" },
-      { "course": "MEP1000", "day": "Monday", "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 1 & 2 together" }
+      { "course": "CVP2502", "day": "Monday",   "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Tuesday",  "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Friday",   "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF1)" },
+      { "course": "CVP2702", "day": "Thursday", "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "MEP1000", "day": "Monday",   "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 1 & 2 together" }
     ],
     "group2": [
-      { "course": "CVP2502", "day": "Tuesday", "time": "3:00 - 5:00 PM", "venue": "Block V, Rm 216" },
-      { "course": "CVP2601", "day": "Thursday", "time": "3:00 - 5:00 PM", "venue": "Blk IV-3F, 4-A-8" },
-      { "course": "CVP2401", "day": "Friday", "time": "1:00 - 3:00 PM", "venue": "Block IV, Rm 331" },
-      { "course": "CVP2702", "day": "Friday", "time": "3:00 - 5:00 PM", "venue": "Blk V, V312/V313" },
-      { "course": "MEP1000", "day": "Monday", "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 1 & 2 together" }
+      { "course": "CVP2502", "day": "Tuesday",  "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Thursday", "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Monday",   "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF2)" },
+      { "course": "CVP2702", "day": "Friday",   "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "MEP1000", "day": "Monday",   "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 1 & 2 together" }
     ],
     "group3": [
-      { "course": "CVP2401", "day": "Monday", "time": "1:00 - 3:00 PM", "venue": "Block IV, Rm 331" },
-      { "course": "CVP2702", "day": "Monday", "time": "3:00 - 5:00 PM", "venue": "Blk V, V312/V313" },
-      { "course": "CVP2502", "day": "Thursday", "time": "3:00 - 5:00 PM", "venue": "Block V, Rm 216" },
-      { "course": "CVP2601", "day": "Friday", "time": "3:00 - 5:00 PM", "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Tuesday",  "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF3)" },
+      { "course": "CVP2702", "day": "Monday",   "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "CVP2502", "day": "Thursday", "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Friday",   "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
       { "course": "MEP1000", "day": "Thursday", "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 3 & 4 together" }
     ],
     "group4": [
-      { "course": "CVP2601", "day": "Monday", "time": "3:00 - 5:00 PM", "venue": "Blk IV-3F, 4-A-8" },
-      { "course": "CVP2401", "day": "Tuesday", "time": "1:00 - 3:00 PM", "venue": "Block IV, Rm 331" },
-      { "course": "CVP2702", "day": "Tuesday", "time": "3:00 - 5:00 PM", "venue": "Blk V, V312/V313" },
-      { "course": "CVP2502", "day": "Friday", "time": "3:00 - 5:00 PM", "venue": "Block V, Rm 216" },
+      { "course": "CVP2601", "day": "Monday",   "time": "3:00 - 5:00 PM",  "venue": "Blk IV-3F, 4-A-8" },
+      { "course": "CVP2401", "day": "Thursday", "time": "2:00 - 4:00 PM",  "venue": "Block IV, Rm 331", "note": "F slot (PF4)" },
+      { "course": "CVP2702", "day": "Tuesday",  "time": "3:00 - 5:00 PM",  "venue": "Blk V, V312/V313" },
+      { "course": "CVP2502", "day": "Friday",   "time": "3:00 - 5:00 PM",  "venue": "Block V, Rm 216" },
       { "course": "MEP1000", "day": "Thursday", "time": "9:00 - 12:00 PM", "venue": "CSC", "note": "Gr 3 & 4 together" }
     ]
   },

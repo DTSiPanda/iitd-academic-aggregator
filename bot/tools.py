@@ -13,19 +13,19 @@ LAB_GROUP_SCHEDULE = {
     "group1": {
         "CVP2502": {"day": "Monday",   "time": "15:00"},
         "CVP2601": {"day": "Tuesday",  "time": "15:00"},
-        "CVP2401": {"day": "Thursday", "time": "13:00"},
+        "CVP2401": {"day": "Friday",   "time": "14:00"},   # F slot → PF1 (2-4 PM)
         "CVP2702": {"day": "Thursday", "time": "15:00"},
         "MEP1000": {"day": "Monday",   "time": "09:00"},
     },
     "group2": {
         "CVP2502": {"day": "Tuesday",  "time": "15:00"},
         "CVP2601": {"day": "Thursday", "time": "15:00"},
-        "CVP2401": {"day": "Friday",   "time": "13:00"},
+        "CVP2401": {"day": "Monday",   "time": "14:00"},   # F slot → PF2 (2-4 PM)
         "CVP2702": {"day": "Friday",   "time": "15:00"},
         "MEP1000": {"day": "Monday",   "time": "09:00"},
     },
     "group3": {
-        "CVP2401": {"day": "Monday",   "time": "13:00"},
+        "CVP2401": {"day": "Tuesday",  "time": "14:00"},   # F slot → PF3 (2-4 PM)
         "CVP2702": {"day": "Monday",   "time": "15:00"},
         "CVP2502": {"day": "Thursday", "time": "15:00"},
         "CVP2601": {"day": "Friday",   "time": "15:00"},
@@ -33,7 +33,7 @@ LAB_GROUP_SCHEDULE = {
     },
     "group4": {
         "CVP2601": {"day": "Monday",   "time": "15:00"},
-        "CVP2401": {"day": "Tuesday",  "time": "13:00"},
+        "CVP2401": {"day": "Thursday", "time": "14:00"},   # F slot → PF4 (2-4 PM)
         "CVP2702": {"day": "Tuesday",  "time": "15:00"},
         "CVP2502": {"day": "Friday",   "time": "15:00"},
         "MEP1000": {"day": "Thursday", "time": "09:00"},
@@ -54,8 +54,21 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreXJxdWZidmFpcXJobGprY3VzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NTY3MzY0MCwiZXhwIjoyMTAxMjQ5NjQwfQ.jgn76pM-QDaSD0jseu1h_kgZGyL_59_gQH3jh157Ids")
 
 def _load() -> dict:
-    with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+    """Load overrides — try Supabase first (always fresh), fall back to local file."""
+    empty = {"cancellations": [], "deadline_overrides": [], "exams": [], "notes": [], "flagged": [], "lab_done": []}
+    try:
+        sp = create_client(SUPABASE_URL, SUPABASE_KEY)
+        res = sp.table("overrides").select("data").eq("id", "user_overrides").single().execute()
+        if res.data and res.data.get("data"):
+            return res.data["data"]
+    except Exception:
+        pass
+    # Fall back to local file
+    try:
+        with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return empty
 
 
 def _push_to_supabase(data: dict):
@@ -126,6 +139,9 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
             "note": args.get("note", ""),
             "added_at": datetime.now().isoformat()
         }
+        # Deduplicate by (course, day)
+        data["cancellations"] = [c for c in data["cancellations"]
+                                  if not (c["course"] == entry["course"] and c["day"] == entry["day"])]
         data["cancellations"].append(entry)
         _save(data)
         return f"❌ Noted — {args['course']} on {args['day']} marked as cancelled."
@@ -165,6 +181,10 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
             "note": args.get("note", ""),
             "added_at": datetime.now().isoformat()
         }
+        # Deduplicate by (course, item) — update existing instead of stacking
+        data["deadline_overrides"] = [d for d in data["deadline_overrides"]
+                                       if not (d["course"] == entry["course"] and
+                                               d["item"].lower() == entry["item"].lower())]
         data["deadline_overrides"].append(entry)
         _save(data)
         return f"📅 Got it — {args['item']} ({course}) deadline set ({scope_label})."
@@ -172,8 +192,8 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
     elif tool_name == "add_exam":
         s_date = _fix_year(args["start_date"])
         e_date = _fix_year(args.get("end_date", s_date))
-        # Remove existing exam with same name if present
-        data["exams"] = [e for e in data["exams"] if e.get("name") != args["name"]]
+        # Deduplicate case-insensitively by name
+        data["exams"] = [e for e in data["exams"] if e.get("name", "").lower() != args["name"].lower()]
         entry = {
             "name": args["name"],
             "start_date": s_date,
@@ -194,6 +214,10 @@ def execute_tool(tool_name: str, args: dict, user_group: str = "group1") -> str:
             "priority": args.get("priority", "medium"),
             "added_at": datetime.now().isoformat()
         }
+        # Deduplicate by (course, text)
+        data["notes"] = [n for n in data["notes"]
+                         if not (n["course"] == entry["course"] and
+                                 n["text"].lower() == entry["text"].lower())]
         data["notes"].append(entry)
         _save(data)
         priority_emoji = {"high": "🔴", "medium": "🟡", "low": "🔵"}.get(args.get("priority", "medium"), "🟡")

@@ -21,6 +21,7 @@ Or just message naturally:
 import os
 import json
 import logging
+import requests
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -29,7 +30,7 @@ from telegram.ext import (
 )
 from dotenv import load_dotenv
 from llm_processor import process_message
-from tools import execute_tool
+from tools import execute_tool, PUBLIC_OVERRIDES_PATH, _push_to_supabase
 
 load_dotenv()
 
@@ -236,7 +237,7 @@ async def sync_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             url = f"https://api.github.com/repos/{repo}/actions/workflows/scrape.yml/dispatches"
             headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github.v3+json"}
             res = requests.post(url, headers=headers, json={"ref": "main"})
-            if res.status_code == 24:
+            if res.status_code == 204:
                 gh_triggered = True
         except Exception:
             pass
