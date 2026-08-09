@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-09T12:37:11.342517+00:00",
+  "last_updated": "2026-08-09T15:25:08.258669+00:00",
   "courses": [
     {
       "id": "CVL2502",
@@ -65,7 +65,7 @@
           "url": "/files/CVL2401/Course_Outline.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         },
         {
@@ -74,7 +74,7 @@
           "url": "/files/CVL2401/02_Part_1_Earth_Composition__Minerals__Rocks.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         }
       ],
@@ -96,7 +96,7 @@
           "url": "/files/CVP2401/Assignment_01_Resourse.pdf",
           "category": "tutorial",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         },
         {
@@ -105,12 +105,12 @@
           "url": "/files/CVP2401/Laboratory_2_Resource.pdf",
           "category": "lab",
           "group_deadlines": {
-            "group1": "Thursday at 1:00 - 3:00 PM",
-            "group2": "Friday at 1:00 - 3:00 PM",
-            "group3": "Monday at 1:00 - 3:00 PM",
-            "group4": "Tuesday at 1:00 - 3:00 PM"
+            "group1": "Friday at 2:00 - 4:00 PM",
+            "group2": "Monday at 2:00 - 4:00 PM",
+            "group3": "Tuesday at 2:00 - 4:00 PM",
+            "group4": "Thursday at 2:00 - 4:00 PM"
           },
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         }
       ],
@@ -149,7 +149,7 @@
             "group3": "Thursday at 3:00 - 5:00 PM",
             "group4": "Friday at 3:00 - 5:00 PM"
           },
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         },
         {
@@ -158,7 +158,7 @@
           "url": "/files/CVP2502/Schedule__Expt_1-5.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         },
         {
@@ -167,7 +167,7 @@
           "url": "/files/CVP2502/Subgroups__Expt_1-5.pdf",
           "category": "lecture",
           "group_deadlines": {},
-          "uploaded_at": "2026-08-09T12:37:11.342517+00:00",
+          "uploaded_at": "2026-08-09T15:25:08.258669+00:00",
           "is_new": false
         }
       ],
@@ -226,9 +226,10 @@
       },
       {
         "course": "CVP2401",
-        "day": "Thursday",
-        "time": "1:00 - 3:00 PM",
-        "venue": "Block IV, Rm 331"
+        "day": "Friday",
+        "time": "2:00 - 4:00 PM",
+        "venue": "Block IV, Rm 331",
+        "note": "F slot (PF1)"
       },
       {
         "course": "CVP2702",
@@ -259,9 +260,10 @@
       },
       {
         "course": "CVP2401",
-        "day": "Friday",
-        "time": "1:00 - 3:00 PM",
-        "venue": "Block IV, Rm 331"
+        "day": "Monday",
+        "time": "2:00 - 4:00 PM",
+        "venue": "Block IV, Rm 331",
+        "note": "F slot (PF2)"
       },
       {
         "course": "CVP2702",
@@ -280,9 +282,10 @@
     "group3": [
       {
         "course": "CVP2401",
-        "day": "Monday",
-        "time": "1:00 - 3:00 PM",
-        "venue": "Block IV, Rm 331"
+        "day": "Tuesday",
+        "time": "2:00 - 4:00 PM",
+        "venue": "Block IV, Rm 331",
+        "note": "F slot (PF3)"
       },
       {
         "course": "CVP2702",
@@ -319,9 +322,10 @@
       },
       {
         "course": "CVP2401",
-        "day": "Tuesday",
-        "time": "1:00 - 3:00 PM",
-        "venue": "Block IV, Rm 331"
+        "day": "Thursday",
+        "time": "2:00 - 4:00 PM",
+        "venue": "Block IV, Rm 331",
+        "note": "F slot (PF4)"
       },
       {
         "course": "CVP2702",
@@ -422,11 +426,6 @@
         "venue": "LH 416"
       },
       {
-        "course": "CVL2601",
-        "time": "9:00 - 9:50 AM",
-        "venue": "LH 416"
-      },
-      {
         "course": "CVL2502",
         "time": "10:00 - 10:50 AM",
         "venue": "WS 101 (SeNSE)"
@@ -440,7 +439,8 @@
       {
         "course": "CVL2001",
         "time": "12:00 - 12:50 PM",
-        "venue": "LH 108"
+        "venue": "LH 108",
+        "note": "May not happen — depends on professor. Check before attending."
       }
     ]
   },
