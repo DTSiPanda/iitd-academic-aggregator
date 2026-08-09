@@ -205,9 +205,11 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
         best = max(entries, key=lambda e: e["resource_count"] + e["assignment_count"] * 2)
 
         prev_res_titles = get_previous_resource_titles(prev_data, code)
-        prev_assign_titles = get_previous_assignment_titles(prev_data, code)
+        prev_course = next((c for c in prev_data.get("courses", []) if c.get("id") == code), {})
+        prev_items = prev_course.get("new_items", [])
+        prev_assignments = prev_course.get("assignments", [])
 
-        # Build resource list — deduplicate by title
+        # Build resource list — start with newly scraped resources
         seen_titles = set()
         resources_out = []
         for res in best.get("resources", []):
@@ -237,10 +239,25 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
                 "is_new": is_new,
             })
 
+        # Additively preserve existing resources from previous data
+        for prev_res in prev_items:
+            t = prev_res.get("title", "")
+            if t and t not in seen_titles:
+                seen_titles.add(t)
+                resources_out.append({
+                    "type": prev_res.get("type", "file"),
+                    "title": t,
+                    "url": prev_res.get("url", ""),
+                    "category": prev_res.get("category", classify_item(t, prev_res.get("type", "file"))),
+                    "group_deadlines": prev_res.get("group_deadlines", {}),
+                    "uploaded_at": prev_res.get("uploaded_at") or now,
+                    "is_new": False,
+                })
+
         # Sort: newest first
         resources_out.sort(key=lambda x: x["uploaded_at"], reverse=True)
 
-        # Build assignments list
+        # Build assignments list — start with newly scraped
         assignments_out = []
         seen_assign = set()
         for a in best.get("assignments", []):
@@ -256,6 +273,13 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
                 "due_date_raw": a.get("due_date"),
                 "is_new": t not in prev_assign_titles,
             })
+
+        # Additively preserve existing assignments
+        for prev_a in prev_assignments:
+            t = prev_a.get("title", "")
+            if t and t not in seen_assign:
+                seen_assign.add(t)
+                assignments_out.append(prev_a)
 
         # Sort: soonest due first
         assignments_out.sort(
@@ -275,6 +299,12 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
             "new_items": resources_out,
             "assignments": assignments_out,
         })
+
+    # Add any courses from previous data that weren't in the current scrape
+    for prev_c in prev_data.get("courses", []):
+        p_id = prev_c.get("id")
+        if p_id and not any(c["id"] == p_id for c in courses_out):
+            courses_out.append(prev_c)
 
     prev_course_count = len(prev_data.get('courses', []))
     new_course_count = len(courses_out)
