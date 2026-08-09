@@ -1,10 +1,10 @@
 {
-  "last_updated": "2026-08-09T17:42:22.795Z",
+  "last_updated": "2026-08-09T17:45:31.792158+00:00",
   "courses": [
     {
       "id": "CVL2502",
       "name": "Analysis of Determinate Structures",
-      "moodle": "new",
+      "moodle": "unknown",
       "color": "#3b82f6",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9901",
       "instructor": "Sahil Bansal",
@@ -16,7 +16,7 @@
     {
       "id": "CVL2001",
       "name": "Climate Change & Adaptation",
-      "moodle": "new",
+      "moodle": "unknown",
       "color": "#10b981",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897",
       "instructor": "Gazala Habib",
@@ -306,7 +306,7 @@
     {
       "id": "CVL2702",
       "name": "Hydraulics",
-      "moodle": "new",
+      "moodle": "unknown",
       "color": "#8b5cf6",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9903",
       "instructor": "Saumava Dey",
@@ -373,7 +373,7 @@
     {
       "id": "CVL1301",
       "name": "Surveying & Remote Sensing",
-      "moodle": "new",
+      "moodle": "unknown",
       "color": "#6366f1",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9896",
       "instructor": "Sri Harsha Kota",
@@ -404,7 +404,7 @@
     {
       "id": "CVL2601",
       "name": "Traffic & Transportation Planning",
-      "moodle": "new",
+      "moodle": "unknown",
       "color": "#ef4444",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9902",
       "instructor": "Pramesh Kumar",
