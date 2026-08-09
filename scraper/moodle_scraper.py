@@ -295,33 +295,64 @@ class MoodleScraper:
                     elif "/mod/resource/" in lower_url or "pluginfile.php" in lower_url:
                         collected_resources.append({"title": title, "url": full_url, "type": "file"})
                     elif "/mod/folder/" in lower_url:
+                        collected_resources.append({"title": title, "url": full_url, "type": "folder"})
+                    elif "/mod/url/" in lower_url or "drive.google" in lower_url or "onedrive" in lower_url or "dropbox" in lower_url or "/mod/page/" in lower_url:
                         collected_resources.append({"title": title, "url": full_url, "type": "url"})
-                    elif "/mod/url/" in lower_url or "drive.google" in lower_url or "onedrive" in lower_url or "dropbox" in lower_url:
-                        collected_resources.append({"title": title, "url": full_url, "type": "url"})
-                    elif "/mod/page/" in lower_url:
-                        collected_resources.append({"title": title, "url": full_url, "type": "url"})
-                    elif any(lower_url.endswith(ext) for ext in [".pdf", ".pptx", ".docx", ".zip", ".xlsx"]):
+                    elif any(lower_url.endswith(ext) for ext in [".pdf", ".pptx", ".docx", ".zip", ".xlsx", ".dwg", ".dxf", ".ipt"]):
                         collected_resources.append({"title": title, "url": full_url, "type": "file"})
                 except Exception:
                     continue
-
-            # Second pass: Process resources (download files safely)
+            # Second pass: Process resources and unpack folder activities
+            folder_urls_to_unpack = []
             for res in collected_resources:
                 try:
-                    if res["type"] == "file":
+                    if res["type"] == "folder":
+                        folder_urls_to_unpack.append(res)
+                    elif res["type"] == "file":
                         local_file_url = await self._download_resource_file(page, course_code, res["title"], res["url"])
+                        result["resources"].append({
+                            "title": res["title"],
+                            "url": local_file_url,
+                            "type": "file",
+                            "uploaded_at": None,
+                        })
                     else:
-                        local_file_url = res["url"]
-
-                    result["resources"].append({
-                        "title": res["title"],
-                        "url": local_file_url,
-                        "type": res["type"],
-                        "uploaded_at": None,
-                    })
+                        result["resources"].append({
+                            "title": res["title"],
+                            "url": res["url"],
+                            "type": res["type"],
+                            "uploaded_at": None,
+                        })
                 except Exception as ex:
                     print(f"  [{self.label}] ⚠️ Resource error: {ex}")
                     continue
+
+            # Unpack files inside folders using a secondary page
+            if folder_urls_to_unpack:
+                folder_page = await context.new_page()
+                try:
+                    for fld in folder_urls_to_unpack:
+                        try:
+                            unpacked_files = await self._extract_folder_files(folder_page, fld["url"], fld["title"], course_code)
+                            if unpacked_files:
+                                result["resources"].extend(unpacked_files)
+                            else:
+                                # Keep folder URL as fallback
+                                result["resources"].append({
+                                    "title": fld["title"],
+                                    "url": fld["url"],
+                                    "type": "url",
+                                    "uploaded_at": None,
+                                })
+                        except Exception:
+                            result["resources"].append({
+                                "title": fld["title"],
+                                "url": fld["url"],
+                                "type": "url",
+                                "uploaded_at": None,
+                            })
+                finally:
+                    await folder_page.close()
 
             # Third pass: Process assignments and quizzes using a secondary page (avoids destroying main DOM)
             if collected_assignments:
@@ -349,6 +380,34 @@ class MoodleScraper:
 
         print(f"  [{self.label}]   → {len(result['resources'])} resources, {len(result['assignments'])} assignments")
         return result
+
+    async def _extract_folder_files(self, page: Page, folder_url: str, folder_title: str, course_code: str) -> list[dict]:
+        """Inspect a Moodle folder activity to extract individual downloadable files."""
+        files = []
+        try:
+            await page.goto(folder_url, wait_until="domcontentloaded", timeout=20000)
+            file_links = await page.query_selector_all(".fp-filename-icon a, span.fp-filename a, a[href*='pluginfile.php']")
+            seen_furls = set()
+            for flink in file_links:
+                href = await flink.get_attribute("href")
+                if not href or href.startswith("#") or href in seen_furls:
+                    continue
+                seen_furls.add(href)
+                fname = (await flink.inner_text()).strip()
+                if not fname:
+                    fname = re.sub(r"\?.*$", "", href).split("/")[-1]
+                full_furl = href if href.startswith("http") else self.base_url + href
+                title = f"{folder_title} — {fname}" if folder_title.lower() not in fname.lower() else fname
+                local_file = await self._download_resource_file(page, course_code, title, full_furl)
+                files.append({
+                    "title": title,
+                    "url": local_file,
+                    "type": "file",
+                    "uploaded_at": None,
+                })
+        except Exception as e:
+            print(f"  [{self.label}] ⚠️ Error inspecting folder {folder_url}: {e}")
+        return files
 
     async def _get_item_due_date(self, page: Page, item_url: str, item_type: str = "assignment") -> str | None:
         """Navigate to an assignment or quiz page and extract the due date."""
@@ -381,27 +440,45 @@ class MoodleScraper:
             save_dir = os.path.join(os.path.dirname(__file__), "..", "public", "files", course_code)
             os.makedirs(save_dir, exist_ok=True)
 
-            # Check if file already exists
-            for ext in [".pdf", ".pptx", ".docx", ".doc", ".zip", ".png", ".jpg"]:
+            # Check if file already exists with any known extension
+            known_exts = [".pdf", ".pptx", ".docx", ".doc", ".zip", ".png", ".jpg", ".dwg", ".dxf", ".ipt", ".iam", ".idw", ".xlsx", ".rar", ".7z"]
+            for ext in known_exts:
                 existing_path = os.path.join(save_dir, f"{safe_title}{ext}")
                 if os.path.exists(existing_path):
                     return f"/files/{course_code}/{safe_title}{ext}"
 
             print(f"  [{self.label}] 📥 Downloading file: {title}...")
-            response = await page.request.get(res_url, timeout=20000)
+            response = await page.request.get(res_url, timeout=25000)
             if response.status == 200:
                 content_type = response.headers.get("content-type", "").lower()
+                cd = response.headers.get("content-disposition", "")
                 ext = ".pdf"
-                if "presentation" in content_type or "powerpoint" in content_type:
-                    ext = ".pptx"
-                elif "word" in content_type or "document" in content_type:
-                    ext = ".docx"
-                elif "png" in content_type:
-                    ext = ".png"
-                elif "jpeg" in content_type or "jpg" in content_type:
-                    ext = ".jpg"
-                elif "zip" in content_type:
-                    ext = ".zip"
+
+                # Check filename from Content-Disposition header first
+                if "filename=" in cd:
+                    match = re.search(r'filename=["\']?([^"\';]+)["\']?', cd)
+                    if match:
+                        orig_ext = os.path.splitext(match.group(1).strip())[1].lower()
+                        if orig_ext and len(orig_ext) <= 6:
+                            ext = orig_ext
+
+                if ext == ".pdf":
+                    if "presentation" in content_type or "powerpoint" in content_type or "pptx" in content_type:
+                        ext = ".pptx"
+                    elif "word" in content_type or "document" in content_type or "docx" in content_type:
+                        ext = ".docx"
+                    elif "png" in content_type:
+                        ext = ".png"
+                    elif "jpeg" in content_type or "jpg" in content_type:
+                        ext = ".jpg"
+                    elif "zip" in content_type:
+                        ext = ".zip"
+                    elif "dwg" in content_type or "autocad" in content_type:
+                        ext = ".dwg"
+                    elif "dxf" in content_type:
+                        ext = ".dxf"
+                    elif "excel" in content_type or "spreadsheet" in content_type or "xlsx" in content_type:
+                        ext = ".xlsx"
 
                 file_path = os.path.join(save_dir, f"{safe_title}{ext}")
                 with open(file_path, "wb") as f:
