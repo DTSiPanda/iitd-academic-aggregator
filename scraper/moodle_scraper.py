@@ -177,15 +177,59 @@ class MoodleScraper:
         print(f"  [{self.label}] Found {len(courses)} enrolled courses")
         return courses
 
-    async def scrape_course(self, page: Page, course_url: str, course_name: str) -> dict:
-        """Scrape a single course page for files and assignments."""
+    async def _clean_title(self, el) -> str:
+        """Extract and clean title from an activity link/container."""
+        title = ""
+        # Try aria-label first
+        aria = (await el.get_attribute("aria-label") or "").strip()
+        if aria:
+            title = aria
+        else:
+            # Try instancename or activityname child
+            title_el = await el.query_selector(".instancename, .activityname")
+            if title_el:
+                title = (await title_el.inner_text()).strip()
+            else:
+                title = (await el.inner_text()).strip()
+
+        # Remove common Moodle type suffixes & noise
+        noise_patterns = [
+            r"\s*File$", r"\s*URL$", r"\s*Page$", r"\s*Folder$",
+            r"\s*Assignment$", r"\s*Quiz$", r"\s*Forum$", r"\s*Announcement$",
+            r"\s*External tool$", r"\s*Document$", r"\s*PDF document$",
+            r"^Course name\s*", r"^Course image\s*"
+        ]
+        for pat in noise_patterns:
+            title = re.sub(pat, "", title, flags=re.IGNORECASE).strip()
+
+        # Remove excess internal whitespace/newlines
+        title = re.sub(r"\s+", " ", title).strip()
+        return title
+
+    async def scrape_course(self, page: Page, context: BrowserContext, course_url: str, course_name: str) -> dict:
+        """Scrape a single course page for files, folders, urls, assignments, and quizzes."""
         print(f"  [{self.label}] Scraping: {course_name}")
         result = {"resources": [], "assignments": [], "page_title": ""}
 
         course_code = detect_course_code(course_name) or "general"
 
         try:
-            await page.goto(course_url, wait_until="domcontentloaded", timeout=30000)
+            await page.goto(course_url, wait_until="domcontentloaded", timeout=35000)
+
+            # Expand all collapsed sections in modern Moodle / moodlenew
+            try:
+                expand_btns = await page.query_selector_all(
+                    "[data-action='expand-all'], .expandall, .collapse-all-sections a, "
+                    "button.section-toggle, [aria-expanded='false']"
+                )
+                for btn in expand_btns:
+                    try:
+                        await btn.click(timeout=800)
+                    except Exception:
+                        pass
+                await page.wait_for_timeout(800)
+            except Exception:
+                pass
 
             # If course name is unknown, extract it from the page heading
             if not course_name:
@@ -200,106 +244,105 @@ class MoodleScraper:
                             print(f"  [{self.label}]   name from page: {course_name}")
                             break
 
-            # --- RESOURCES (files, PDFs, slides) ---
-            resource_els = await page.query_selector_all(
-                "li.activity.resource, li.modtype_resource, "
-                ".activityinstance a[href*='mod/resource'], "
-                "a[href*='mod/resource/view.php']"
+            # Find all activity links and content links across the page
+            link_els = await page.query_selector_all(
+                "a[href*='/mod/resource/view.php'], "
+                "a[href*='/mod/folder/view.php'], "
+                "a[href*='/mod/url/view.php'], "
+                "a[href*='/mod/page/view.php'], "
+                "a[href*='/mod/assign/view.php'], "
+                "a[href*='/mod/quiz/view.php'], "
+                "a[href*='pluginfile.php'], "
+                "a[href*='drive.google.com'], "
+                "a[href*='onedrive.live.com'], "
+                "a[href*='1drv.ms'], "
+                "a[href*='dropbox.com'], "
+                ".activity-item a.aal_link, "
+                ".activityinstance a, "
+                ".activity-basis a"
             )
-            seen_res = set()
-            for el in resource_els:
+
+            seen_urls = set()
+            collected_resources = []
+            collected_assignments = []
+
+            # First pass: collect metadata from DOM before doing any async downloads/navigations
+            for el in link_els:
                 try:
                     href = await el.get_attribute("href")
-                    if not href or href in seen_res:
-                        continue
-                    seen_res.add(href)
-
-                    # Get the title — either from the element itself or a child
-                    title_el = await el.query_selector(".instancename, .activityname")
-                    if title_el:
-                        title = (await title_el.inner_text()).strip()
-                    else:
-                        title = (await el.inner_text()).strip()
-
-                    # Clean up title (Moodle sometimes appends " File" suffix)
-                    title = re.sub(r"\s+File$", "", title).strip()
-                    if not title:
+                    if not href or href.startswith("#") or href.startswith("javascript:"):
                         continue
 
                     full_url = href if href.startswith("http") else self.base_url + href
-                    
-                    # Download file using Playwright's authenticated request session
-                    local_file_url = await self._download_resource_file(page, course_code, title, full_url)
+                    if full_url in seen_urls:
+                        continue
+                    seen_urls.add(full_url)
+
+                    title = await self._clean_title(el)
+                    if not title or len(title) < 2:
+                        continue
+
+                    # Filter out navigation links
+                    lower_url = full_url.lower()
+                    if any(skip in lower_url for skip in ["/user/", "/grade/", "/message/", "/calendar/", "/badges/", "/participants"]):
+                        continue
+
+                    # Classify link type
+                    if "/mod/assign/" in lower_url:
+                        collected_assignments.append({"title": title, "url": full_url, "type": "assignment"})
+                    elif "/mod/quiz/" in lower_url:
+                        collected_assignments.append({"title": title, "url": full_url, "type": "quiz"})
+                    elif "/mod/resource/" in lower_url or "pluginfile.php" in lower_url:
+                        collected_resources.append({"title": title, "url": full_url, "type": "file"})
+                    elif "/mod/folder/" in lower_url:
+                        collected_resources.append({"title": title, "url": full_url, "type": "url"})
+                    elif "/mod/url/" in lower_url or "drive.google" in lower_url or "onedrive" in lower_url or "dropbox" in lower_url:
+                        collected_resources.append({"title": title, "url": full_url, "type": "url"})
+                    elif "/mod/page/" in lower_url:
+                        collected_resources.append({"title": title, "url": full_url, "type": "url"})
+                    elif any(lower_url.endswith(ext) for ext in [".pdf", ".pptx", ".docx", ".zip", ".xlsx"]):
+                        collected_resources.append({"title": title, "url": full_url, "type": "file"})
+                except Exception:
+                    continue
+
+            # Second pass: Process resources (download files safely)
+            for res in collected_resources:
+                try:
+                    if res["type"] == "file":
+                        local_file_url = await self._download_resource_file(page, course_code, res["title"], res["url"])
+                    else:
+                        local_file_url = res["url"]
 
                     result["resources"].append({
-                        "title": title,
+                        "title": res["title"],
                         "url": local_file_url,
-                        "type": "file",
-                        "uploaded_at": None,  # will attempt to fill below
+                        "type": res["type"],
+                        "uploaded_at": None,
                     })
                 except Exception as ex:
                     print(f"  [{self.label}] ⚠️ Resource error: {ex}")
                     continue
 
-            # Also pick up URLs and pages (folders, external links)
-            other_els = await page.query_selector_all(
-                "a[href*='mod/url/view.php'], a[href*='mod/page/view.php'], "
-                "a[href*='mod/folder/view.php']"
-            )
-            for el in other_els:
+            # Third pass: Process assignments and quizzes using a secondary page (avoids destroying main DOM)
+            if collected_assignments:
+                detail_page = await context.new_page()
                 try:
-                    href = await el.get_attribute("href")
-                    if not href or href in seen_res:
-                        continue
-                    seen_res.add(href)
-                    title_el = await el.query_selector(".instancename, .activityname")
-                    title = (await (title_el or el).inner_text()).strip()
-                    title = re.sub(r"\s+(URL|Page|Folder)$", "", title).strip()
-                    if not title:
-                        continue
-                    full_url = href if href.startswith("http") else self.base_url + href
-                    result["resources"].append({
-                        "title": title,
-                        "url": full_url,
-                        "type": "url",
-                        "uploaded_at": None,
-                    })
-                except Exception:
-                    continue
-
-            # --- ASSIGNMENTS ---
-            assign_els = await page.query_selector_all(
-                "li.activity.assign a[href*='mod/assign'], "
-                "li.modtype_assign a[href*='mod/assign'], "
-                "a[href*='mod/assign/view.php']"
-            )
-            seen_assign = set()
-            for el in assign_els:
-                try:
-                    href = await el.get_attribute("href")
-                    if not href or href in seen_assign:
-                        continue
-                    seen_assign.add(href)
-                    title_el = await el.query_selector(".instancename, .activityname")
-                    title = (await (title_el or el).inner_text()).strip()
-                    title = re.sub(r"\s+Assignment$", "", title).strip()
-                    if not title:
-                        continue
-
-                    full_url = href if href.startswith("http") else self.base_url + href
-
-                    # Try to get due date from assignment page
-                    due_date = await self._get_assignment_due_date(page, full_url)
-
-                    result["assignments"].append({
-                        "title": title,
-                        "url": full_url,
-                        "due_date": due_date,
-                    })
-                    # Go back to course page after visiting assignment
-                    await page.goto(course_url, wait_until="domcontentloaded", timeout=30000)
-                except Exception:
-                    continue
+                    for a in collected_assignments:
+                        try:
+                            due_date = await self._get_item_due_date(detail_page, a["url"], a["type"])
+                            result["assignments"].append({
+                                "title": a["title"],
+                                "url": a["url"],
+                                "due_date": due_date,
+                            })
+                        except Exception:
+                            result["assignments"].append({
+                                "title": a["title"],
+                                "url": a["url"],
+                                "due_date": None,
+                            })
+                finally:
+                    await detail_page.close()
 
         except Exception as e:
             print(f"  [{self.label}] Error scraping {course_name}: {e}")
@@ -307,22 +350,23 @@ class MoodleScraper:
         print(f"  [{self.label}]   → {len(result['resources'])} resources, {len(result['assignments'])} assignments")
         return result
 
-    async def _get_assignment_due_date(self, page: Page, assign_url: str) -> str | None:
-        """Navigate to an assignment page and extract the due date."""
+    async def _get_item_due_date(self, page: Page, item_url: str, item_type: str = "assignment") -> str | None:
+        """Navigate to an assignment or quiz page and extract the due date."""
         try:
-            await page.goto(assign_url, wait_until="domcontentloaded", timeout=20000)
+            await page.goto(item_url, wait_until="domcontentloaded", timeout=18000)
 
-            # Moodle shows due date in a table row with "Due date" label
-            rows = await page.query_selector_all("tr")
+            # Look in tables or text blocks for due date / close date
+            rows = await page.query_selector_all("tr, .activity-information, [data-region='activity-dates']")
             for row in rows:
-                label_el = await row.query_selector("td.cell.c0, th")
-                if label_el:
-                    label_text = (await label_el.inner_text()).lower()
-                    if "due" in label_text:
-                        value_el = await row.query_selector("td.cell.c1, td:last-child")
-                        if value_el:
-                            due_str = (await value_el.inner_text()).strip()
-                            return due_str
+                text = (await row.inner_text()).lower()
+                if "due" in text or "close" in text or "closes" in text:
+                    # Look for date value
+                    val_el = await row.query_selector("td.cell.c1, td:last-child, .text-muted, div:last-child")
+                    if val_el:
+                        val_text = (await val_el.inner_text()).strip()
+                        if val_text and len(val_text) > 4:
+                            return val_text
+                    return text.strip()
         except Exception:
             pass
         return None
@@ -344,7 +388,7 @@ class MoodleScraper:
                     return f"/files/{course_code}/{safe_title}{ext}"
 
             print(f"  [{self.label}] 📥 Downloading file: {title}...")
-            response = await page.request.get(res_url)
+            response = await page.request.get(res_url, timeout=20000)
             if response.status == 200:
                 content_type = response.headers.get("content-type", "").lower()
                 ext = ".pdf"
@@ -394,7 +438,7 @@ class MoodleScraper:
             courses = await self.get_enrolled_courses(page)
 
             for course in courses:
-                data = await self.scrape_course(page, course["url"], course["name_raw"])
+                data = await self.scrape_course(page, context, course["url"], course["name_raw"])
                 results.append({
                     "moodle": self.label,
                     "moodle_id": course["moodle_id"],

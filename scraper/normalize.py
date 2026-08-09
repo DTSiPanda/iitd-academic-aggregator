@@ -173,6 +173,16 @@ def get_previous_assignment_titles(prev_data: dict, course_id: str) -> set:
     return set()
 
 
+def get_previous_uploaded_at(prev_data: dict, course_id: str, title: str) -> str | None:
+    """Get original uploaded_at timestamp from previous data.json to avoid resetting timestamps."""
+    for course in prev_data.get("courses", []):
+        if course.get("id") == course_id:
+            for item in course.get("new_items", []):
+                if item.get("title") == title and item.get("uploaded_at"):
+                    return item["uploaded_at"]
+    return None
+
+
 def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
     """
     Merge results from both Moodles into a single normalized payload.
@@ -182,17 +192,12 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
     now = datetime.now(timezone.utc).isoformat()
     lab_schedules, lecture_schedule, semester_timeline = load_lab_schedules()
 
-    # Safety guard logic removed from here, moving it to after merging courses
-
     # Group all scraped courses by detected course code
     by_code: dict[str, list] = {}
     for entry in (old_results + new_results):
         code = detect_course_code(entry.get("name_raw", ""))
         if code:
             by_code.setdefault(code, []).append(entry)
-        else:
-            # Unknown course — skip
-            pass
 
     courses_out = []
     for code, entries in by_code.items():
@@ -218,13 +223,17 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
             if category == "lab":
                 group_deadlines = get_lab_group_deadlines(code, lab_schedules)
 
+            # Preserve original upload date if known, or use now for brand new items
+            prev_uploaded_at = get_previous_uploaded_at(prev_data, code, t)
+            uploaded_at = prev_uploaded_at if prev_uploaded_at else (res.get("uploaded_at") or now)
+
             resources_out.append({
                 "type": res.get("type", "file"),
                 "title": t,
                 "url": res["url"],
                 "category": category,
                 "group_deadlines": group_deadlines,
-                "uploaded_at": res.get("uploaded_at") or now,
+                "uploaded_at": uploaded_at,
                 "is_new": is_new,
             })
 
