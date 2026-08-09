@@ -317,9 +317,8 @@ def write_data_json(payload: dict, output_path: str):
     print(f"   Courses: {len(payload['courses'])}")
     print(f"   Last updated: {payload['last_updated']}")
 
-    # Push to Supabase DB if credentials are present
     sp_url = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.co")
-    sp_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    sp_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip() or os.getenv("SUPABASE_KEY", "").strip() or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "").strip() or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreXJxdWZidmFpcXJobGprY3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2NzM2NDAsImV4cCI6MjEwMTI0OTY0MH0.SI13PGWIekj0D_8EYtOPG1n30We5cXRfdYSqJUtYLs0"
     if sp_key:
         try:
             from supabase import create_client

@@ -11,17 +11,33 @@ const EMPTY_OVERRIDES: Overrides = {
 };
 
 export async function fetchData(): Promise<AggregatorData> {
+  let dbData: AggregatorData | null = null;
+  let fileData: AggregatorData | null = null;
+
   try {
     const { data } = await supabase.from('moodle_data').select('data').eq('id', 'current_data').single();
     if (data && data.data && Object.keys(data.data).length > 0) {
-      return data.data as AggregatorData;
+      dbData = data.data as AggregatorData;
     }
-  } catch {
-    // fallback to static file
+  } catch {}
+
+  try {
+    const res = await fetch('/data.json', { cache: 'no-store' });
+    if (res.ok) {
+      fileData = await res.json();
+    }
+  } catch {}
+
+  if (dbData && fileData) {
+    // Compare timestamps to pick the most recent data
+    const dbTime = new Date(dbData.last_updated || 0).getTime();
+    const fileTime = new Date(fileData.last_updated || 0).getTime();
+    return dbTime >= fileTime ? dbData : fileData;
   }
-  const res = await fetch('/data.json', { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch data.json');
-  return res.json();
+
+  if (dbData) return dbData;
+  if (fileData) return fileData;
+  throw new Error('Failed to fetch data from both Supabase and /data.json');
 }
 
 /**
