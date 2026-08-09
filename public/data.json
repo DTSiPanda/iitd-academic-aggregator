@@ -1,204 +1,228 @@
 {
-  "last_updated": "2026-08-09T17:41:06.147Z",
+  "last_updated": "2026-08-09T17:33:37.952902+00:00",
   "courses": [
+    {
+      "id": "CVL2502",
+      "name": "Analysis of Determinate Structures",
+      "moodle": "new",
+      "color": "#3b82f6",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9901",
+      "instructor": "Sahil Bansal",
+      "credits": 3,
+      "venue": "WS 101 (SeNSE)",
+      "new_items": [],
+      "assignments": []
+    },
+    {
+      "id": "CVL2001",
+      "name": "Climate Change & Adaptation",
+      "moodle": "new",
+      "color": "#10b981",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897",
+      "instructor": "Gazala Habib",
+      "credits": 2,
+      "venue": "LH 108",
+      "new_items": [],
+      "assignments": []
+    },
     {
       "id": "MEP1000",
       "name": "Introduction to Engineering Systems",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#14b8a6",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25754",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=10374",
+      "instructor": "TBA",
+      "credits": 2,
+      "venue": null,
       "new_items": [
         {
           "type": "file",
           "title": "1. Proxy Setup Step by step instructions",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163288",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "file",
           "title": "5. General Guidelines",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163291",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "file",
           "title": "A3 Template",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163296",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "file",
           "title": "Lab Sheet 1",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163324",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lab",
           "group_deadlines": {
             "group1": "Monday at 9:00 - 12:00 PM",
             "group2": "Monday at 9:00 - 12:00 PM",
             "group3": "Thursday at 9:00 - 12:00 PM",
             "group4": "Thursday at 9:00 - 12:00 PM"
-          }
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "file",
           "title": "Lab Sheet 2",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163180",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lab",
           "group_deadlines": {
             "group1": "Monday at 9:00 - 12:00 PM",
             "group2": "Monday at 9:00 - 12:00 PM",
             "group3": "Thursday at 9:00 - 12:00 PM",
             "group4": "Thursday at 9:00 - 12:00 PM"
-          }
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "file",
           "title": "Grid Sheet",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163181",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lab",
           "group_deadlines": {
             "group1": "Monday at 9:00 - 12:00 PM",
             "group2": "Monday at 9:00 - 12:00 PM",
             "group3": "Thursday at 9:00 - 12:00 PM",
             "group4": "Thursday at 9:00 - 12:00 PM"
-          }
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "Reference Online Lectures",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163274",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "2. How to create a Autodesk ID.",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163289",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "3. Introduction to AutoCAD Interface",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163287",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "4. Introduction to Autodesk Inventor",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163290",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "Lecture on Free Hand Sketching",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163276",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "Lecture on visualization, rotations, and reflections of objects",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163277",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "1. Introduction to Isometric view",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163183",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "2. Example to draw solid on grid paper",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163184",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "3. 2D Coded Plan to isometric",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163185",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "4. Rotation of solid through 2D coded plan.",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163186",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "5. Rotation of solid through axes rotation",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163187",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "6. Rotation of solid_Example.",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163188",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "url",
           "title": "7. Reflection of solid.",
           "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163189",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         }
       ],
-      "assignments": [],
-      "instructor": "TBA",
-      "credits": 2,
-      "venue": null
+      "assignments": []
     },
     {
       "id": "CVP2702",
@@ -206,276 +230,11 @@
       "moodle": "new",
       "color": "#ec4899",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9971",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
       "new_items": [],
-      "assignments": [],
-      "instructor": null,
-      "credits": null,
-      "venue": null
-    },
-    {
-      "id": "CVP2601",
-      "name": "Traffic & Transport Planning Lab",
-      "moodle": "new",
-      "color": "#84cc16",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9970",
-      "new_items": [
-        {
-          "type": "file",
-          "title": "Lecture",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163385",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lecture",
-          "group_deadlines": {}
-        },
-        {
-          "type": "file",
-          "title": "Worksheet",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163387",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Tuesday at 3:00 - 5:00 PM",
-            "group2": "Thursday at 3:00 - 5:00 PM",
-            "group3": "Friday at 3:00 - 5:00 PM",
-            "group4": "Monday at 3:00 - 5:00 PM"
-          }
-        },
-        {
-          "type": "file",
-          "title": "Lab 2 Handout",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163867",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Tuesday at 3:00 - 5:00 PM",
-            "group2": "Thursday at 3:00 - 5:00 PM",
-            "group3": "Friday at 3:00 - 5:00 PM",
-            "group4": "Monday at 3:00 - 5:00 PM"
-          }
-        },
-        {
-          "type": "file",
-          "title": "Lab 2 Slides",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163868",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Tuesday at 3:00 - 5:00 PM",
-            "group2": "Thursday at 3:00 - 5:00 PM",
-            "group3": "Friday at 3:00 - 5:00 PM",
-            "group4": "Monday at 3:00 - 5:00 PM"
-          }
-        },
-        {
-          "type": "file",
-          "title": "Lab2 (Trip Generation 1) Worksheet",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163869",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Tuesday at 3:00 - 5:00 PM",
-            "group2": "Thursday at 3:00 - 5:00 PM",
-            "group3": "Friday at 3:00 - 5:00 PM",
-            "group4": "Monday at 3:00 - 5:00 PM"
-          }
-        },
-        {
-          "type": "file",
-          "title": "TAZ2010_wORIGDEST data",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163870",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Tuesday at 3:00 - 5:00 PM",
-            "group2": "Thursday at 3:00 - 5:00 PM",
-            "group3": "Friday at 3:00 - 5:00 PM",
-            "group4": "Monday at 3:00 - 5:00 PM"
-          }
-        },
-        {
-          "type": "file",
-          "title": "MetaData",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163871",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lecture",
-          "group_deadlines": {}
-        },
-        {
-          "type": "url",
-          "title": "Travel Behavior Inventory 2010 Home Interview Survey",
-          "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163388",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lecture",
-          "group_deadlines": {}
-        }
-      ],
-      "assignments": [],
-      "instructor": null,
-      "credits": null,
-      "venue": null
-    },
-    {
-      "id": "CVP2502",
-      "name": "Solid Mechanics & Structural Lab",
-      "moodle": "new",
-      "color": "#06b6d4",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9969",
-      "new_items": [
-        {
-          "type": "file",
-          "title": "Handout",
-          "url": "https://moodlenew.iitd.ac.in/mod/resource/view.php?id=20445",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": true,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Monday at 3:00 - 5:00 PM",
-            "group2": "Tuesday at 3:00 - 5:00 PM",
-            "group3": "Thursday at 3:00 - 5:00 PM",
-            "group4": "Friday at 3:00 - 5:00 PM"
-          }
-        },
-        {
-          "type": "file",
-          "title": "Schedule (Expt 1-5)",
-          "url": "https://moodlenew.iitd.ac.in/mod/resource/view.php?id=20446",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": true,
-          "category": "lecture",
-          "group_deadlines": {}
-        },
-        {
-          "type": "file",
-          "title": "Subgroups (Expt 1-5)",
-          "url": "https://moodlenew.iitd.ac.in/mod/resource/view.php?id=20447",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": true,
-          "category": "lecture",
-          "group_deadlines": {}
-        }
-      ],
-      "assignments": [],
-      "instructor": null,
-      "credits": null,
-      "venue": null
-    },
-    {
-      "id": "CVP2401",
-      "name": "Geological Engineering Lab",
-      "moodle": "new",
-      "color": "#f97316",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9967",
-      "new_items": [
-        {
-          "type": "file",
-          "title": "Assignment 01_Resourse",
-          "url": "https://moodlenew.iitd.ac.in/mod/resource/view.php?id=20464",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": true,
-          "category": "tutorial",
-          "group_deadlines": {}
-        },
-        {
-          "type": "file",
-          "title": "Laboratory 2_Resource",
-          "url": "https://moodlenew.iitd.ac.in/mod/resource/view.php?id=20541",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": true,
-          "category": "lab",
-          "group_deadlines": {
-            "group1": "Thursday at 1:00 - 3:00 PM",
-            "group2": "Friday at 1:00 - 3:00 PM",
-            "group3": "Monday at 1:00 - 3:00 PM",
-            "group4": "Tuesday at 1:00 - 3:00 PM"
-          }
-        }
-      ],
-      "assignments": [],
-      "instructor": null,
-      "credits": null,
-      "venue": null
-    },
-    {
-      "id": "CVL2702",
-      "name": "Hydraulics",
-      "moodle": "new",
-      "color": "#8b5cf6",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9903",
-      "new_items": [
-        {
-          "type": "file",
-          "title": "Lecture Slides: Introduction to Hydraulics - Basic Concepts",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163662",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lecture",
-          "group_deadlines": {}
-        }
-      ],
-      "assignments": [],
-      "instructor": "Saumava Dey",
-      "credits": 3,
-      "venue": "LH 416"
-    },
-    {
-      "id": "CVL2601",
-      "name": "Traffic & Transportation Planning",
-      "moodle": "new",
-      "color": "#ef4444",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9901",
-      "new_items": [
-        {
-          "type": "file",
-          "title": "Syllabus",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163462",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lab",
-          "group_deadlines": {}
-        },
-        {
-          "type": "file",
-          "title": "Lecture 0: Course Logistics",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163463",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lecture",
-          "group_deadlines": {}
-        },
-        {
-          "type": "file",
-          "title": "Lecture 1: Intro to the course",
-          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163464",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
-          "category": "lecture",
-          "group_deadlines": {}
-        }
-      ],
-      "assignments": [],
-      "instructor": "Pramesh Kumar",
-      "credits": 2,
-      "venue": "LH 416"
-    },
-    {
-      "id": "CVL2502",
-      "name": "Analysis of Determinate Structures",
-      "moodle": "new",
-      "color": "#3b82f6",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9900",
-      "new_items": [],
-      "assignments": [],
-      "instructor": "Sahil Bansal",
-      "credits": 3,
-      "venue": "WS 101 (SeNSE)"
+      "assignments": []
     },
     {
       "id": "CVL2401",
@@ -483,16 +242,10 @@
       "moodle": "new",
       "color": "#f59e0b",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9898",
+      "instructor": "Bappaditya Manna",
+      "credits": 2,
+      "venue": "Block VI, LT 2",
       "new_items": [
-        {
-          "type": "file",
-          "title": "Course Outline",
-          "url": "https://moodlenew.iitd.ac.in/mod/resource/view.php?id=20456",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": true,
-          "category": "lecture",
-          "group_deadlines": {}
-        },
         {
           "type": "file",
           "title": "02_Part 1_Earth Composition, Minerals. Rocks",
@@ -500,56 +253,303 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-08-07T12:47:42.502014+00:00",
-          "is_new": true
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Course Outline",
+          "url": "/files/CVL2401/Course_Outline.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         }
       ],
-      "assignments": [],
-      "instructor": "Bappaditya Manna",
-      "credits": 2,
-      "venue": "Block VI, LT 2"
+      "assignments": []
     },
     {
-      "id": "CVL2001",
-      "name": "Climate Change & Adaptation",
+      "id": "CVP2401",
+      "name": "Geological Engineering Lab",
       "moodle": "new",
-      "color": "#10b981",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9896",
-      "new_items": [],
-      "assignments": [],
-      "instructor": "Gazala Habib",
-      "credits": 2,
-      "venue": "LH 108"
+      "color": "#f97316",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9967",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [
+        {
+          "type": "file",
+          "title": "Assignment 01_Resourse",
+          "url": "/files/CVP2401/Assignment_01_Resourse.pdf",
+          "category": "tutorial",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Laboratory 2_Resource",
+          "url": "/files/CVP2401/Laboratory_2_Resource.pdf",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Friday at 2:00 - 4:00 PM",
+            "group2": "Monday at 2:00 - 4:00 PM",
+            "group3": "Tuesday at 2:00 - 4:00 PM",
+            "group4": "Thursday at 2:00 - 4:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        }
+      ],
+      "assignments": []
+    },
+    {
+      "id": "CVL2702",
+      "name": "Hydraulics",
+      "moodle": "new",
+      "color": "#8b5cf6",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9903",
+      "instructor": "Saumava Dey",
+      "credits": 3,
+      "venue": "LH 416",
+      "new_items": [
+        {
+          "type": "file",
+          "title": "Lecture Slides: Introduction to Hydraulics - Basic Concepts",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163662",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        }
+      ],
+      "assignments": []
+    },
+    {
+      "id": "CVP2502",
+      "name": "Solid Mechanics & Structural Lab",
+      "moodle": "new",
+      "color": "#06b6d4",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9969",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [
+        {
+          "type": "file",
+          "title": "Handout",
+          "url": "/files/CVP2502/Handout.pdf",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Monday at 3:00 - 5:00 PM",
+            "group2": "Tuesday at 3:00 - 5:00 PM",
+            "group3": "Thursday at 3:00 - 5:00 PM",
+            "group4": "Friday at 3:00 - 5:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Schedule (Expt 1-5)",
+          "url": "/files/CVP2502/Schedule__Expt_1-5.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Subgroups (Expt 1-5)",
+          "url": "/files/CVP2502/Subgroups__Expt_1-5.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        }
+      ],
+      "assignments": []
     },
     {
       "id": "CVL1301",
       "name": "Surveying & Remote Sensing",
       "moodle": "new",
       "color": "#6366f1",
-      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9896",
+      "instructor": "Sri Harsha Kota",
+      "credits": 2,
+      "venue": "WS 101 (SeNSE)",
       "new_items": [
         {
           "type": "file",
           "title": "Lectures 1-3",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163647",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         },
         {
           "type": "file",
           "title": "Course Details",
           "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163648",
-          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
-          "is_new": false,
           "category": "lecture",
-          "group_deadlines": {}
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
         }
       ],
-      "assignments": [],
-      "instructor": "Sri Harsha Kota",
+      "assignments": []
+    },
+    {
+      "id": "CVL2601",
+      "name": "Traffic & Transportation Planning",
+      "moodle": "new",
+      "color": "#ef4444",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9902",
+      "instructor": "Pramesh Kumar",
       "credits": 2,
-      "venue": "WS 101 (SeNSE)"
+      "venue": "LH 416",
+      "new_items": [
+        {
+          "type": "file",
+          "title": "Syllabus",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163462",
+          "category": "lab",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Lecture 0: Course Logistics",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163463",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Lecture 1: Intro to the course",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163464",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        }
+      ],
+      "assignments": []
+    },
+    {
+      "id": "CVP2601",
+      "name": "Traffic & Transport Planning Lab",
+      "moodle": "new",
+      "color": "#84cc16",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9970",
+      "instructor": null,
+      "credits": null,
+      "venue": null,
+      "new_items": [
+        {
+          "type": "file",
+          "title": "Lecture",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163385",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Worksheet",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163387",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Tuesday at 3:00 - 5:00 PM",
+            "group2": "Thursday at 3:00 - 5:00 PM",
+            "group3": "Friday at 3:00 - 5:00 PM",
+            "group4": "Monday at 3:00 - 5:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Lab 2 Handout",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163867",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Tuesday at 3:00 - 5:00 PM",
+            "group2": "Thursday at 3:00 - 5:00 PM",
+            "group3": "Friday at 3:00 - 5:00 PM",
+            "group4": "Monday at 3:00 - 5:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Lab 2 Slides",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163868",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Tuesday at 3:00 - 5:00 PM",
+            "group2": "Thursday at 3:00 - 5:00 PM",
+            "group3": "Friday at 3:00 - 5:00 PM",
+            "group4": "Monday at 3:00 - 5:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "Lab2 (Trip Generation 1) Worksheet",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163869",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Tuesday at 3:00 - 5:00 PM",
+            "group2": "Thursday at 3:00 - 5:00 PM",
+            "group3": "Friday at 3:00 - 5:00 PM",
+            "group4": "Monday at 3:00 - 5:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "TAZ2010_wORIGDEST data",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163870",
+          "category": "lab",
+          "group_deadlines": {
+            "group1": "Tuesday at 3:00 - 5:00 PM",
+            "group2": "Thursday at 3:00 - 5:00 PM",
+            "group3": "Friday at 3:00 - 5:00 PM",
+            "group4": "Monday at 3:00 - 5:00 PM"
+          },
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "file",
+          "title": "MetaData",
+          "url": "https://moodle.iitd.ac.in/mod/resource/view.php?id=163871",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        },
+        {
+          "type": "url",
+          "title": "Travel Behavior Inventory 2010 Home Interview Survey",
+          "url": "https://moodle.iitd.ac.in/mod/url/view.php?id=163388",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-02T10:40:38.815290+00:00",
+          "is_new": false
+        }
+      ],
+      "assignments": []
     }
   ],
   "lab_schedules": {
