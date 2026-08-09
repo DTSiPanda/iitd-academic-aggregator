@@ -6,6 +6,7 @@ import { fetchData, fetchOverrides } from '@/lib/fetchData';
 import dynamic from 'next/dynamic';
 import GroupSelectorModal from '@/components/GroupSelectorModal';
 import GlobalSearch from '@/components/GlobalSearch';
+import NotificationBell from '@/components/NotificationBell';
 
 const TodayTab    = dynamic(() => import('@/components/tabs/TodayTab'));
 const WeekTab     = dynamic(() => import('@/components/tabs/WeekTab'));
@@ -128,6 +129,7 @@ export default function App() {
             >
               <span>🔍 Search</span>
             </button>
+            {data && <NotificationBell data={data} />}
             <button
               onClick={() => setShowModal(true)}
               style={{
