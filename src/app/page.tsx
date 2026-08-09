@@ -66,9 +66,20 @@ export default function App() {
           setOverrides(payload.new.data);
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'moodle_data' }, (payload: any) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'moodle_data' }, async (payload: any) => {
         if (payload.new && payload.new.data) {
-          setData(payload.new.data);
+          // Re-apply schedule overlay so realtime update never overwrites fresh schedules.json
+          const schedule = await fetchSchedules();
+          if (schedule) {
+            setData({
+              ...payload.new.data,
+              lab_schedules: schedule.lab_schedules as AggregatorData['lab_schedules'],
+              lecture_schedule: schedule.lecture_schedule,
+              ...(schedule.semester_timeline ? { semester_timeline: schedule.semester_timeline } : {}),
+            });
+          } else {
+            setData(payload.new.data);
+          }
         }
       })
       .subscribe();

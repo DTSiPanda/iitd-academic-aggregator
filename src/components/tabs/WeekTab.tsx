@@ -169,6 +169,12 @@ export default function WeekTab({ data, labGroup, overrides }: Props) {
                       📍 {slot.venue}
                     </div>
 
+                    {slot.note && (
+                      <div style={{ fontSize: 11, color: '#b45309', fontWeight: 600, marginTop: 3 }}>
+                        ℹ️ {slot.note}
+                      </div>
+                    )}
+
                     {notes.slice(0, 2).map((note, ni) => (
                       <NoteChip key={ni} note={note} />
                     ))}

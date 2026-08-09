@@ -144,6 +144,9 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
                         {slot.cancelled ? '❌ ' : ''}{slot.code} — {slot.course}
                       </span>
                       <div style={{ fontSize: 11, color: '#64748b' }}>📍 {slot.venue}</div>
+                      {slot.note && (
+                        <div style={{ fontSize: 11, color: '#b45309', fontWeight: 600, marginTop: 2 }}>ℹ️ {slot.note}</div>
+                      )}
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</span>
                   </div>
@@ -200,6 +203,9 @@ export default function TodayTab({ data, labGroup, overrides }: Props) {
                       {slot.cancelled ? '❌ ' : ''}{slot.code} — {slot.course}
                     </span>
                     <div style={{ fontSize: 11, color: '#64748b' }}>📍 {slot.venue}</div>
+                    {slot.note && (
+                      <div style={{ fontSize: 11, color: '#b45309', fontWeight: 600, marginTop: 2 }}>ℹ️ {slot.note}</div>
+                    )}
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>{slot.time}</span>
                 </div>
