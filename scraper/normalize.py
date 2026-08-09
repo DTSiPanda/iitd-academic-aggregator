@@ -183,10 +183,25 @@ def get_previous_uploaded_at(prev_data: dict, course_id: str, title: str) -> str
     return None
 
 
+STATIC_COURSES_META = {
+    "CVL1301": {"instructor": "Sri Harsha Kota", "credits": 2, "venue": "WS 101 (SeNSE)", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897"},
+    "CVL2001": {"instructor": "Gazala Habib", "credits": 2, "venue": "LH 108", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9896"},
+    "CVL2401": {"instructor": "Bappaditya Manna", "credits": 2, "venue": "Block VI, LT 2", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9898"},
+    "CVL2502": {"instructor": "Sahil Bansal", "credits": 3, "venue": "WS 101 (SeNSE)", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9900"},
+    "CVL2601": {"instructor": "Pramesh Kumar", "credits": 2, "venue": "LH 416", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9901"},
+    "CVL2702": {"instructor": "Saumava Dey", "credits": 3, "venue": "LH 416", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9903"},
+    "CVP2401": {"instructor": "Bappaditya Manna", "credits": 1, "venue": "Geology Lab (Block IV)", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9967"},
+    "CVP2502": {"instructor": "Sahil Bansal", "credits": 1, "venue": "Structures Lab", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9969"},
+    "CVP2601": {"instructor": "Pramesh Kumar", "credits": 1, "venue": "Transportation Lab", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9970"},
+    "CVP2702": {"instructor": "Saumava Dey", "credits": 1, "venue": "Hydraulics Lab", "moodle": "new", "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9971"},
+    "MEP1000": {"instructor": "Course Coordinator", "credits": 2, "venue": "Dogra Hall / CSC", "moodle": "old", "url": "https://moodle.iitd.ac.in/course/view.php?id=25754"},
+}
+
+
 def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
     """
     Merge results from both Moodles into a single normalized payload.
-    For each course, pick the Moodle with more content (auto-detect active one).
+    Combines resources and assignments across both old and new Moodles additively.
     """
     prev_data = load_previous_data(data_json_path)
     now = datetime.now(timezone.utc).isoformat()
@@ -201,18 +216,22 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
 
     courses_out = []
     for code, entries in by_code.items():
-        # Pick the entry with the most content (active Moodle)
-        best = max(entries, key=lambda e: e["resource_count"] + e["assignment_count"] * 2)
-
+        static_meta = STATIC_COURSES_META.get(code, {})
         prev_res_titles = get_previous_resource_titles(prev_data, code)
+        prev_assign_titles = get_previous_assignment_titles(prev_data, code)
         prev_course = next((c for c in prev_data.get("courses", []) if c.get("id") == code), {})
         prev_items = prev_course.get("new_items", [])
         prev_assignments = prev_course.get("assignments", [])
 
+        # Gather scraped resources across all entries (both old and new Moodle)
+        all_scraped_resources = []
+        for entry in entries:
+            all_scraped_resources.extend(entry.get("resources", []))
+
         # Build resource list — start with newly scraped resources
         seen_titles = set()
         resources_out = []
-        for res in best.get("resources", []):
+        for res in all_scraped_resources:
             t = res["title"]
             if t in seen_titles:
                 continue
@@ -257,10 +276,15 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
         # Sort: newest first
         resources_out.sort(key=lambda x: x["uploaded_at"], reverse=True)
 
+        # Gather scraped assignments across all entries
+        all_scraped_assignments = []
+        for entry in entries:
+            all_scraped_assignments.extend(entry.get("assignments", []))
+
         # Build assignments list — start with newly scraped
         assignments_out = []
         seen_assign = set()
-        for a in best.get("assignments", []):
+        for a in all_scraped_assignments:
             t = a["title"]
             if t in seen_assign:
                 continue
@@ -286,13 +310,28 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
             key=lambda x: x["due_date"] or "9999",
         )
 
-        static_meta = STATIC_COURSES_META.get(code, {})
+        # Determine accurate Moodle type and URL
+        has_old_res = any(e.get("moodle") == "old" and len(e.get("resources", [])) > 0 for e in entries)
+        has_new_res = any(e.get("moodle") == "new" and len(e.get("resources", [])) > 0 for e in entries)
+
+        if code == "MEP1000" or has_old_res or prev_course.get("moodle") == "old":
+            moodle_type = "old"
+            moodle_url = next((e["url"] for e in entries if e.get("moodle") == "old" and "moodle.iitd" in e.get("url", "")), static_meta.get("url", "https://moodle.iitd.ac.in/course/view.php?id=25754"))
+        elif has_new_res:
+            moodle_type = "new"
+            moodle_url = next((e["url"] for e in entries if e.get("moodle") == "new" and "moodlenew" in e.get("url", "")), static_meta.get("url", "https://moodlenew.iitd.ac.in"))
+        else:
+            moodle_type = static_meta.get("moodle", prev_course.get("moodle", "new"))
+            moodle_url = static_meta.get("url", prev_course.get("url", ""))
+
+        raw_title = next((e["name_raw"] for e in entries if e.get("name_raw")), prev_course.get("name", code))
+
         courses_out.append({
             "id": code,
-            "name": KNOWN_COURSES.get(code, best["name_raw"]),
-            "moodle": best["moodle"],
+            "name": KNOWN_COURSES.get(code, raw_title),
+            "moodle": moodle_type,
             "color": COURSE_COLORS.get(code, "#6366f1"),
-            "url": best["url"],
+            "url": moodle_url,
             "instructor": static_meta.get("instructor"),
             "credits": static_meta.get("credits"),
             "venue": static_meta.get("venue"),

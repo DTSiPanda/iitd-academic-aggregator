@@ -80,7 +80,7 @@ class MoodleScraper:
         }])
 
     async def _auto_login(self, page: Page) -> bool:
-        """Auto-login using KERBEROS_ID / KERBEROS_USER & KERBEROS_PASS with captcha solving."""
+        """Auto-login using KERBEROS_ID / KERBEROS_USER & KERBEROS_PASS with captcha solving and retries."""
         user = os.environ.get("KERBEROS_USER", "").strip() or os.environ.get("KERBEROS_ID", "").strip()
         password = os.environ.get("KERBEROS_PASS", "").strip()
         if not user or not password:
@@ -88,38 +88,44 @@ class MoodleScraper:
             return False
 
         print(f"  [{self.label}] 🔑 Attempting auto-login for user '{user}'...")
-        try:
-            await page.goto(f"{self.base_url}/login/index.php", wait_until="networkidle", timeout=30000)
-            
-            # Fill username & password
-            await page.fill("#username, input[name='username']", user)
-            await page.fill("#password, input[name='password']", password)
+        for attempt in range(1, 4):
+            try:
+                await page.goto(f"{self.base_url}/login/index.php", wait_until="networkidle", timeout=30000)
+                
+                # Fill username & password
+                await page.fill("#username, input[name='username']", user)
+                await page.fill("#password, input[name='password']", password)
 
-            # Detect & solve math captcha if present
-            login_form = await page.query_selector("#login, .loginform, form")
-            if login_form:
-                form_text = await login_form.inner_text()
-                captcha_ans = solve_moodle_captcha(form_text)
-                if captcha_ans:
-                    # Find captcha input field (usually valuepkg3 or similar text input)
-                    captcha_inp = await page.query_selector("input[name*='valuepkg'], input[name*='captcha']")
-                    if captcha_inp:
-                        await captcha_inp.fill(captcha_ans)
-                        print(f"  [{self.label}] 🧩 Captcha solved automatically: {captcha_ans}")
+                # Detect & solve math captcha if present
+                login_form = await page.query_selector("#login, .loginform, form")
+                if login_form:
+                    form_text = await login_form.inner_text()
+                    captcha_ans = solve_moodle_captcha(form_text)
+                    if captcha_ans:
+                        # Find captcha input field
+                        captcha_inp = await page.query_selector(
+                            "#valuepkg3, input[name='valuepkg3'], input[name*='valuepkg'], input[name*='captcha'], input[type='text']:not([name='username'])"
+                        )
+                        if captcha_inp:
+                            await captcha_inp.fill(captcha_ans)
+                            print(f"  [{self.label}] 🧩 (Attempt {attempt}) Captcha solved: {captcha_ans}")
 
-            # Click login button
-            await page.click("#loginbtn, input[type='submit']")
-            await page.wait_for_load_state("networkidle", timeout=30000)
+                # Click login button
+                await page.click("#loginbtn, button#loginbtn, input[type='submit']")
+                await page.wait_for_load_state("networkidle", timeout=30000)
 
-            if "login" not in page.url:
-                print(f"  [{self.label}] 🎉 Auto-login successful!")
-                return True
-            else:
-                print(f"  [{self.label}] ❌ Auto-login failed — check credentials.")
-                return False
-        except Exception as e:
-            print(f"  [{self.label}] ❌ Auto-login exception: {e}")
-            return False
+                if "login" not in page.url:
+                    print(f"  [{self.label}] 🎉 Auto-login successful on attempt {attempt}!")
+                    return True
+                else:
+                    print(f"  [{self.label}] ⚠️ Auto-login attempt {attempt} did not complete, retrying...")
+                    await page.wait_for_timeout(1000)
+            except Exception as e:
+                print(f"  [{self.label}] ⚠️ Auto-login attempt {attempt} exception: {e}")
+                await page.wait_for_timeout(1000)
+
+        print(f"  [{self.label}] ❌ Auto-login failed after 3 attempts.")
+        return False
 
     async def _is_logged_in(self, page: Page) -> bool:
         """Check if session cookie is valid, or perform auto-login if expired."""

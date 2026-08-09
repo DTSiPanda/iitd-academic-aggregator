@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-09T17:23:35.947Z",
+  "last_updated": "2026-08-09T17:41:06.147Z",
   "courses": [
     {
       "id": "MEP1000",
@@ -203,9 +203,9 @@
     {
       "id": "CVP2702",
       "name": "Fluid Mechanics & Hydraulics Lab",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#ec4899",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25351",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9971",
       "new_items": [],
       "assignments": [],
       "instructor": null,
@@ -215,9 +215,9 @@
     {
       "id": "CVP2601",
       "name": "Traffic & Transport Planning Lab",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#84cc16",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25350",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9970",
       "new_items": [
         {
           "type": "file",
@@ -406,9 +406,9 @@
     {
       "id": "CVL2702",
       "name": "Hydraulics",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#8b5cf6",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25283",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9903",
       "new_items": [
         {
           "type": "file",
@@ -428,9 +428,9 @@
     {
       "id": "CVL2601",
       "name": "Traffic & Transportation Planning",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#ef4444",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25282",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9901",
       "new_items": [
         {
           "type": "file",
@@ -468,9 +468,9 @@
     {
       "id": "CVL2502",
       "name": "Analysis of Determinate Structures",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#3b82f6",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25281",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9900",
       "new_items": [],
       "assignments": [],
       "instructor": "Sahil Bansal",
@@ -511,9 +511,9 @@
     {
       "id": "CVL2001",
       "name": "Climate Change & Adaptation",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#10b981",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25277",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9896",
       "new_items": [],
       "assignments": [],
       "instructor": "Gazala Habib",
@@ -523,9 +523,9 @@
     {
       "id": "CVL1301",
       "name": "Surveying & Remote Sensing",
-      "moodle": "old",
+      "moodle": "new",
       "color": "#6366f1",
-      "url": "https://moodle.iitd.ac.in/course/view.php?id=25276",
+      "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897",
       "new_items": [
         {
           "type": "file",
