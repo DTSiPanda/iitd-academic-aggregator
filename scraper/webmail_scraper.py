@@ -99,8 +99,20 @@ def fetch_recent_instructor_emails():
                     body = ""
                     if msg.is_multipart():
                         for part in msg.walk():
-                            if part.get_content_type() == "text/plain":
-                                body += part.get_payload(decode=True).decode(errors="ignore")
+                            if part.get_content_type() == 'text/plain':
+                                body = part.get_payload(decode=True).decode(errors='ignore')
+                                break
+                        if not body:
+                            for part in msg.walk():
+                                if part.get_content_type() == 'text/html':
+                                    import html as html_lib
+                                    raw_html = part.get_payload(decode=True).decode(errors='ignore')
+                                    # Strip tags crudely but effectively
+                                    import re
+                                    body = re.sub(r'<[^>]+>', ' ', raw_html)
+                                    body = html_lib.unescape(body)
+                                    body = re.sub(r'\s+', ' ', body).strip()
+                                    break
                     else:
                         body = msg.get_payload(decode=True).decode(errors="ignore")
 

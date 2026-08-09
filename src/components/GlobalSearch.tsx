@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AggregatorData, Resource, Assignment } from '@/types/schema';
 
 interface Props {
@@ -20,6 +20,8 @@ interface SearchResult {
 
 export default function GlobalSearch({ data, isOpen, onClose }: Props) {
   const [query, setQuery] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,7 +44,7 @@ export default function GlobalSearch({ data, isOpen, onClose }: Props) {
   const results: SearchResult[] = [];
 
   if (q.length > 0) {
-    data.courses.forEach(c => {
+    (data.courses ?? []).forEach(c => {
       // Check course match
       if (c.id.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)) {
         results.push({
@@ -51,12 +53,12 @@ export default function GlobalSearch({ data, isOpen, onClose }: Props) {
           courseId: c.id,
           courseName: c.name,
           url: c.url,
-          extra: `${c.new_items.length} materials`,
+          extra: `${c.new_items?.length ?? 0} materials`,
         });
       }
 
       // Check file/slide matches
-      c.new_items.forEach(item => {
+      (c.new_items ?? []).forEach(item => {
         if (item.title.toLowerCase().includes(q)) {
           results.push({
             type: 'slide',
@@ -70,7 +72,7 @@ export default function GlobalSearch({ data, isOpen, onClose }: Props) {
       });
 
       // Check assignment matches
-      c.assignments.forEach(a => {
+      (c.assignments ?? []).forEach(a => {
         if (a.title.toLowerCase().includes(q)) {
           results.push({
             type: 'assignment',
@@ -93,8 +95,12 @@ export default function GlobalSearch({ data, isOpen, onClose }: Props) {
           <input
             type="text"
             placeholder="Search slides, lectures, assignments, or course codes..."
-            value={query}
-            onChange={e => setQuery(e.target.value)}
+            value={inputValue}
+            onChange={e => {
+              setInputValue(e.target.value);
+              if (debounceTimer.current) clearTimeout(debounceTimer.current);
+              debounceTimer.current = setTimeout(() => setQuery(e.target.value), 200);
+            }}
             autoFocus
             style={{
               width: '100%',

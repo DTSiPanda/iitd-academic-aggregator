@@ -51,7 +51,7 @@ from supabase import create_client
 PUBLIC_OVERRIDES_PATH = os.path.join(os.path.dirname(__file__), "..", "public", "overrides.json")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreXJxdWZidmFpcXJobGprY3VzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NTY3MzY0MCwiZXhwIjoyMTAxMjQ5NjQwfQ.jgn76pM-QDaSD0jseu1h_kgZGyL_59_gQH3jh157Ids")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 def _load() -> dict:
     """Load overrides — try Supabase first (always fresh), fall back to local file."""
@@ -118,12 +118,16 @@ def _next_weekday_date(day_name: str, from_date: datetime = None) -> datetime:
 
 
 def _fix_year(date_str: str) -> str:
-    """Ensure dates are always in the current academic year (2026) not past years."""
+    """Ensure a date string has the correct current academic year."""
     if not date_str:
         return date_str
-    for past in ["2025-", "2024-", "2023-"]:
-        if date_str.startswith(past):
-            return date_str.replace(past, "2026-", 1)
+    now = datetime.now()
+    # Academic year: Aug–Dec = current year, Jan–Jul = current year
+    academic_year = str(now.year)
+    # Replace clearly wrong past years (anything 2+ years ago)
+    for past_year in [str(now.year - 2), str(now.year - 3), str(now.year - 4)]:
+        if date_str.startswith(past_year + '-'):
+            return date_str.replace(past_year + '-', academic_year + '-', 1)
     return date_str
 
 

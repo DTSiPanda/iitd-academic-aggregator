@@ -182,11 +182,7 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
     now = datetime.now(timezone.utc).isoformat()
     lab_schedules, lecture_schedule, semester_timeline = load_lab_schedules()
 
-    # Safety guard: If scrapers returned 0 courses (due to login failure or session expiry), keep previous course data!
-    if not old_results and not new_results and prev_data and prev_data.get("courses"):
-        print("  [⚠️ WARNING] Scrapers returned 0 results (login/session issue). Preserving existing courses in data.json!")
-        prev_data["last_updated"] = now
-        return prev_data
+    # Safety guard logic removed from here, moving it to after merging courses
 
     # Group all scraped courses by detected course code
     by_code: dict[str, list] = {}
@@ -271,6 +267,13 @@ def merge(old_results: list, new_results: list, data_json_path: str) -> dict:
             "assignments": assignments_out,
         })
 
+    prev_course_count = len(prev_data.get('courses', []))
+    new_course_count = len(courses_out)
+    # If we got significantly fewer courses than before, keep existing data to avoid wipe
+    if prev_course_count > 0 and new_course_count < prev_course_count * 0.5:
+        print(f"[SAFETY] Scraper returned only {new_course_count}/{prev_course_count} courses. Preserving existing data.")
+        return prev_data
+
     return {
         "last_updated": now,
         "courses": courses_out,
@@ -307,7 +310,7 @@ def write_data_json(payload: dict, output_path: str):
 
     # Push to Supabase DB if credentials are present
     sp_url = os.getenv("SUPABASE_URL", "https://xkyrqufbvaiqrhljkcus.supabase.co")
-    sp_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhreXJxdWZidmFpcXJobGprY3VzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NTY3MzY0MCwiZXhwIjoyMTAxMjQ5NjQwfQ.jgn76pM-QDaSD0jseu1h_kgZGyL_59_gQH3jh157Ids")
+    sp_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
     if sp_key:
         try:
             from supabase import create_client
