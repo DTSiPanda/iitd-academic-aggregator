@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-20T03:41:58.719562+00:00",
+  "last_updated": "2026-08-20T06:36:02.282330+00:00",
   "courses": [
     {
       "id": "CVL2502",
@@ -277,6 +277,24 @@
       "credits": null,
       "venue": null,
       "new_items": [
+        {
+          "type": "file",
+          "title": "Assignment 03",
+          "url": "/files/CVP2401/Assignment_03.pdf",
+          "category": "tutorial",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-20T06:36:02.282330+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "Assignment 04",
+          "url": "/files/CVP2401/Assignment_04.pdf",
+          "category": "tutorial",
+          "group_deadlines": {},
+          "uploaded_at": "2026-08-20T06:36:02.282330+00:00",
+          "is_new": true
+        },
         {
           "type": "file",
           "title": "Assignment 01_Resourse",
