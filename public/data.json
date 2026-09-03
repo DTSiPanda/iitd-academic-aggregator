@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-03T13:12:26.839768+00:00",
+  "last_updated": "2026-09-03T18:18:32.642087+00:00",
   "courses": [
     {
       "id": "CVL2502",
@@ -30,7 +30,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -39,7 +39,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -48,7 +48,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -57,7 +57,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -66,7 +66,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -75,7 +75,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -84,7 +84,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -93,7 +93,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         },
         {
           "type": "file",
@@ -102,7 +102,7 @@
           "category": "lecture",
           "group_deadlines": {},
           "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
-          "is_new": true
+          "is_new": false
         }
       ],
       "assignments": []
