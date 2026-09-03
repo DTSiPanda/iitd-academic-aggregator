@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-09-03T07:38:17.755321+00:00",
+  "last_updated": "2026-09-03T13:12:26.839768+00:00",
   "courses": [
     {
       "id": "CVL2502",
@@ -16,13 +16,95 @@
     {
       "id": "CVL2001",
       "name": "Climate Change & Adaptation",
-      "moodle": "unknown",
+      "moodle": "new",
       "color": "#10b981",
       "url": "https://moodlenew.iitd.ac.in/course/view.php?id=9897",
       "instructor": "Gazala Habib",
       "credits": 2,
       "venue": "LH 108",
-      "new_items": [],
+      "new_items": [
+        {
+          "type": "file",
+          "title": "LECTURE 1",
+          "url": "/files/CVL2001/LECTURE_1.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "LECTURE 2",
+          "url": "/files/CVL2001/LECTURE_2.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "2.1 LECTURE 3: IMPACT AND CLIMATE CHANGE",
+          "url": "/files/CVL2001/2_1_LECTURE_3__IMPACT_AND_CLIMATE_CHANGE.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "2.2 LECTURE 4: Climate Change Impacts_Wayanad",
+          "url": "/files/CVL2001/2_2_LECTURE_4__Climate_Change_Impacts_Wayanad.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "2.3 Lecture_5_Thresholds_Abrupt_Change",
+          "url": "/files/CVL2001/2_3_Lecture_5_Thresholds_Abrupt_Change.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "2.4 Lecture_6_Adaptation_Case_study_Mumbai_Ahmedabad",
+          "url": "/files/CVL2001/2_4_Lecture_6_Adaptation_Case_study_Mumbai_Ahmedabad.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "3.1 Lecture_1and2_ClimateScienceFoundation",
+          "url": "/files/CVL2001/3_1_Lecture_1and2_ClimateScienceFoundation.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "3.2.Lecture_3_Radiation_Energy_Balance",
+          "url": "/files/CVL2001/3_2_Lecture_3_Radiation_Energy_Balance.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        },
+        {
+          "type": "file",
+          "title": "3.3 Lecture_4_SimpleClimateModel",
+          "url": "/files/CVL2001/3_3_Lecture_4_SimpleClimateModel.pdf",
+          "category": "lecture",
+          "group_deadlines": {},
+          "uploaded_at": "2026-09-03T13:12:26.839768+00:00",
+          "is_new": true
+        }
+      ],
       "assignments": []
     },
     {
